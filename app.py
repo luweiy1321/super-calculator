@@ -267,42 +267,42 @@ if st.session_state.active_tab == 'calc':
         for i, (btn, btn_type) in enumerate(buttons):
             with cols[i % 4]:
                 if st.button(btn, key=f"calc_{btn}", use_container_width=True):
-                if btn == 'AC':
-                    st.session_state.display = '0'
-                    st.session_state.current_input = ''
-                    st.session_state.operator = ''
-                    st.session_state.prev_input = ''
-                elif btn == '⌫':
-                    if st.session_state.current_input:
-                        st.session_state.current_input = st.session_state.current_input[:-1]
-                        st.session_state.display = st.session_state.current_input or '0'
-                elif btn in ['+', '-', '×', '÷', '%']:
-                    st.session_state.prev_input = st.session_state.current_input or st.session_state.display
-                    st.session_state.current_input = ''
-                    st.session_state.operator = btn
-                elif btn == '=':
-                    if st.session_state.prev_input and st.session_state.current_input and st.session_state.operator:
-                        try:
-                            a = float(st.session_state.prev_input)
-                            b = float(st.session_state.current_input)
-                            if st.session_state.operator == '+':
-                                result = a + b
-                            elif st.session_state.operator == '-':
-                                result = a - b
-                            elif st.session_state.operator == '×':
-                                result = a * b
-                            elif st.session_state.operator == '÷':
-                                result = a / b if b != 0 else 0
-                            elif st.session_state.operator == '%':
-                                result = a % b
-                            st.session_state.display = str(int(result)) if result == int(result) else str(result)
-                            st.session_state.current_input = ''
-                        except:
-                            st.session_state.display = 'Error'
-                else:
-                    st.session_state.current_input += btn
-                    st.session_state.display = st.session_state.current_input
-                st.rerun()
+                    if btn == 'AC':
+                        st.session_state.display = '0'
+                        st.session_state.current_input = ''
+                        st.session_state.operator = ''
+                        st.session_state.prev_input = ''
+                    elif btn == '⌫':
+                        if st.session_state.current_input:
+                            st.session_state.current_input = st.session_state.current_input[:-1]
+                            st.session_state.display = st.session_state.current_input or '0'
+                    elif btn in ['+', '-', '×', '÷', '%']:
+                        st.session_state.prev_input = st.session_state.current_input or st.session_state.display
+                        st.session_state.current_input = ''
+                        st.session_state.operator = btn
+                    elif btn == '=':
+                        if st.session_state.prev_input and st.session_state.current_input and st.session_state.operator:
+                            try:
+                                a = float(st.session_state.prev_input)
+                                b = float(st.session_state.current_input)
+                                if st.session_state.operator == '+':
+                                    result = a + b
+                                elif st.session_state.operator == '-':
+                                    result = a - b
+                                elif st.session_state.operator == '×':
+                                    result = a * b
+                                elif st.session_state.operator == '÷':
+                                    result = a / b if b != 0 else 0
+                                elif st.session_state.operator == '%':
+                                    result = a % b
+                                st.session_state.display = str(int(result)) if result == int(result) else str(result)
+                                st.session_state.current_input = ''
+                            except:
+                                st.session_state.display = 'Error'
+                        else:
+                            st.session_state.current_input += btn
+                            st.session_state.display = st.session_state.current_input
+                    st.rerun()
 
 # ========== AI拍照解题 ==========
 elif st.session_state.active_tab == 'ai':
