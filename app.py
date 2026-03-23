@@ -9,34 +9,42 @@ st.set_page_config(
     layout="centered"
 )
 
-# CSS 样式
+# CSS 样式 - 移动端适配
 st.markdown("""
 <style>
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+        .stApp {
+            padding: 10px !important;
+        }
+        .stRadio > div {
+            flex-direction: row !important;
+            gap: 5px !important;
+        }
+        .stRadio label {
+            padding: 8px 12px !important;
+            font-size: 14px !important;
+        }
+        .stTextInput > div > div input,
+        .stNumberInput > div > div input,
+        .stSelectbox > div > div {
+            font-size: 16px !important;
+            padding: 10px !important;
+        }
+        .stButton > button {
+            padding: 12px !important;
+            font-size: 16px !important;
+        }
+    }
+    
     .stApp {
         background: #1a1a1a;
     }
-    .tab-nav {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-        overflow-x: auto;
-    }
-    .tab-btn {
-        padding: 10px 20px;
-        background: #333;
-        border: none;
-        border-radius: 20px;
-        color: white;
-        cursor: pointer;
-    }
-    .tab-btn.active {
-        background: #007AFF;
-    }
     .display {
         background: #2a2a2a;
-        padding: 20px;
+        padding: 15px;
         text-align: right;
-        font-size: 48px;
+        font-size: 36px;
         border-radius: 15px 15px 0 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -44,14 +52,14 @@ st.markdown("""
     .calculator-buttons {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        gap: 8px;
         padding: 10px;
         background: #2a2a2a;
         border-radius: 0 0 15px 15px;
     }
     .btn {
-        padding: 20px;
-        font-size: 24px;
+        padding: 15px;
+        font-size: 20px;
         border: none;
         border-radius: 10px;
         cursor: pointer;
@@ -61,35 +69,42 @@ st.markdown("""
     .btn-orange { background: #ff9500; }
     .btn-gray { background: #a5a5a5; color: black; }
     .result-highlight {
-        font-size: 36px;
+        font-size: 28px;
         font-weight: bold;
         text-align: center;
-        padding: 20px;
+        padding: 15px;
         background: #007AFF;
         border-radius: 10px;
     }
     .info-card {
         background: #2a2a2a;
-        padding: 15px;
+        padding: 12px;
         border-radius: 10px;
         text-align: center;
     }
-    .info-card .label { font-size: 12px; color: #888; }
-    .info-card .value { font-size: 18px; font-weight: bold; margin-top: 5px; }
-    .rate-refresh {
-        display: inline-block;
-        padding: 8px 16px;
-        background: #007AFF;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        margin-bottom: 10px;
+    .info-card .label { font-size: 11px; color: #888; }
+    .info-card .value { font-size: 16px; font-weight: bold; margin-top: 5px; }
+    
+    /* 调整 radio 按钮大小 */
+    .stRadio > div {
+        gap: 5px;
     }
-    .rate-time {
-        color: #888;
-        font-size: 12px;
-        margin-bottom: 10px;
+    .stRadio label {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    /* 输入框优化 */
+    .stTextInput > div > div,
+    .stNumberInput > div > div,
+    .stSelectbox > div > div {
+        padding: 8px;
+    }
+    
+    /* 按钮优化 */
+    .stButton > button {
+        padding: 10px;
+        font-size: 14px;
     }
 </style>
 """, unsafe_allow_html=True)
