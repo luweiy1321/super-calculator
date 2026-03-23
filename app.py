@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib.request
 import json
+import math
 
 st.set_page_config(
     page_title="超级计算器",
@@ -127,20 +128,145 @@ st.session_state.active_tab = tab_map[selected_tab]
 
 # ========== 计算器 ==========
 if st.session_state.active_tab == 'calc':
-    st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
+    # 选择计算器模式
+    calc_mode = st.radio("模式", ["🧮 基础", "🔬 科学"], horizontal=True, key="calc_mode")
     
-    cols = st.columns(4)
-    buttons = [
-        ('AC', 'gray'), ('⌫', 'gray'), ('%', 'gray'), ('÷', 'orange'),
-        ('7', ''), ('8', ''), ('9', ''), ('×', 'orange'),
-        ('4', ''), ('5', ''), ('6', ''), ('-', 'orange'),
-        ('1', ''), ('2', ''), ('3', ''), ('+', 'orange'),
-    ]
+    if calc_mode == "🔬 科学":
+        # 科学计算器按钮
+        st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
+        
+        # 第一行：三角函数
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if st.button("sin", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.sin(math.radians(val)), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col2:
+            if st.button("cos", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.cos(math.radians(val)), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col3:
+            if st.button("tan", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.tan(math.radians(val)), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col4:
+            if st.button("log", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.log10(val), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        
+        # 第二行
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if st.button("ln", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.log(val), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col2:
+            if st.button("√", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(round(math.sqrt(val), 10))
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col3:
+            if st.button("x²", use_container_width=True):
+                try:
+                    val = float(st.session_state.display)
+                    st.session_state.display = str(val ** 2)
+                except: st.session_state.display = "Error"
+                st.rerun()
+        with col4:
+            if st.button("xⁿ", use_container_width=True):
+                st.session_state.operator = '^'
+                st.session_state.prev_input = st.session_state.display
+                st.session_state.current_input = ''
+                st.rerun()
+        
+        # 第三行：基础运算
+        cols = st.columns(4)
+        buttons = [
+            ('AC', 'gray'), ('⌫', 'gray'), ('(', ''), (')', ''),
+            ('7', ''), ('8', ''), ('9', ''), ('÷', 'orange'),
+            ('4', ''), ('5', ''), ('6', ''), ('×', 'orange'),
+            ('1', ''), ('2', ''), ('3', ''), ('-', 'orange'),
+            ('0', ''), ('.', ''), ('π', ''), ('+', 'orange'),
+        ]
+        
+        for i, (btn, btn_type) in enumerate(buttons):
+            with cols[i % 4]:
+                if st.button(btn, key=f"sci_{btn}", use_container_width=True):
+                    if btn == 'AC':
+                        st.session_state.display = '0'
+                        st.session_state.current_input = ''
+                        st.session_state.operator = ''
+                        st.session_state.prev_input = ''
+                    elif btn == '⌫':
+                        if st.session_state.current_input:
+                            st.session_state.current_input = st.session_state.current_input[:-1]
+                            st.session_state.display = st.session_state.current_input or '0'
+                    elif btn == 'π':
+                        st.session_state.current_input += str(math.pi)
+                        st.session_state.display = st.session_state.current_input
+                    elif btn in ['+', '-', '×', '÷', '^']:
+                        st.session_state.prev_input = st.session_state.current_input or st.session_state.display
+                        st.session_state.current_input = ''
+                        st.session_state.operator = btn
+                    elif btn in ['(', ')']:
+                        st.session_state.current_input += btn
+                        st.session_state.display = st.session_state.current_input
+                    elif btn == '=':
+                        try:
+                            expr = st.session_state.current_input or st.session_state.display
+                            result = eval(expr)
+                            st.session_state.display = str(int(result)) if result == int(result) else str(result)
+                            st.session_state.current_input = ''
+                        except:
+                            st.session_state.display = 'Error'
+                    else:
+                        st.session_state.current_input += btn
+                        st.session_state.display = st.session_state.current_input
+                    st.rerun()
+        
+        # 等号按钮
+        if st.button("＝", use_container_width=True, key="sci_equal"):
+            try:
+                expr = st.session_state.current_input or st.session_state.display
+                result = eval(expr)
+                st.session_state.display = str(int(result)) if result == int(result) else str(result)
+                st.session_state.current_input = ''
+            except:
+                st.session_state.display = 'Error'
+            st.rerun()
     
-    for i, (btn, btn_type) in enumerate(buttons):
-        with cols[i % 4]:
-            btn_class = 'btn-gray' if btn_type == 'gray' else 'btn-orange' if btn_type == 'orange' else 'btn'
-            if st.button(btn, key=f"calc_{btn}", use_container_width=True):
+    else:
+        # 基础计算器
+        st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
+        
+        cols = st.columns(4)
+        buttons = [
+            ('AC', 'gray'), ('⌫', 'gray'), ('%', 'gray'), ('÷', 'orange'),
+            ('7', ''), ('8', ''), ('9', ''), ('×', 'orange'),
+            ('4', ''), ('5', ''), ('6', ''), ('-', 'orange'),
+            ('1', ''), ('2', ''), ('3', ''), ('+', 'orange'),
+        ]
+        
+        for i, (btn, btn_type) in enumerate(buttons):
+            with cols[i % 4]:
+                if st.button(btn, key=f"calc_{btn}", use_container_width=True):
                 if btn == 'AC':
                     st.session_state.display = '0'
                     st.session_state.current_input = ''
