@@ -120,9 +120,9 @@ if 'health_result' not in st.session_state:
     st.session_state.health_result = None
 
 # Tab 导航
-tabs = ['🧮 计算', '🏠 房贷', '🔄 汇率', '❤️ 健康']
-selected_tab = st.radio("", tabs, horizontal=True, index=tabs.index('🧮 计算') if st.session_state.active_tab == 'calc' else 0)
-tab_map = {'🧮 计算': 'calc', '🏠 房贷': 'loan', '🔄 汇率': 'currency', '❤️ 健康': 'health'}
+tabs = ['🧮 计算', '📷 AI拍照', '🏠 房贷', '🔄 换算', '❤️ 健康']
+selected_tab = st.radio("", tabs, horizontal=True, index=0)
+tab_map = {'🧮 计算': 'calc', '📷 AI拍照': 'ai', '🏠 房贷': 'loan', '🔄 换算': 'unit', '❤️ 健康': 'health'}
 st.session_state.active_tab = tab_map[selected_tab]
 
 # ========== 计算器 ==========
@@ -178,6 +178,46 @@ if st.session_state.active_tab == 'calc':
                     st.session_state.display = st.session_state.current_input
                 st.rerun()
 
+# ========== AI拍照解题 ==========
+elif st.session_state.active_tab == 'ai':
+    st.subheader("📷 AI拍照解题")
+    
+    uploaded_file = st.file_uploader("上传数学题图片", type=['jpg', 'jpeg', 'png', 'gif', 'webp'])
+    
+    if uploaded_file:
+        st.image(uploaded_file, caption="上传的图片", use_container_width=True)
+        
+        # 显示说明
+        st.info("📝 AI拍照解题功能需要配置 API Key 才能使用。")
+        st.markdown("""
+        **功能说明：**
+        - 上传包含数学题的图片
+        - AI 自动识别题目并给出解答
+        - 支持代数、几何等多种题型
+        
+        **注意：** 此功能需要后端 AI API 支持。
+        """)
+        
+        # 显示模拟结果（示例）
+        with st.expander("示例效果预览"):
+            st.markdown("""
+            **输入：** 上传一张包含 `2x + 5 = 15` 的图片
+            
+            **输出：**
+            ```
+            解答步骤：
+            1. 两边同时减去 5
+            2x = 15 - 5
+            2x = 10
+            
+            2. 两边同时除以 2
+            x = 10 ÷ 2
+            x = 5
+            
+            答案：x = 5
+            ```
+            """)
+
 # ========== 房贷计算 ==========
 elif st.session_state.active_tab == 'loan':
     st.subheader("🏠 房贷计算器")
@@ -221,43 +261,126 @@ elif st.session_state.active_tab == 'loan':
         </div>
         """, unsafe_allow_html=True)
 
-# ========== 汇率换算 ==========
-elif st.session_state.active_tab == 'currency':
-    st.subheader("🔄 汇率换算")
+# ========== 单位换算 ==========
+elif st.session_state.active_tab == 'unit':
+    st.subheader("🔄 单位换算")
     
-    if st.button("🔄 刷新汇率"):
-        try:
-            with st.spinner("正在获取汇率..."):
-                response = urllib.request.urlopen('https://api.frankfurter.dev/v1/latest?base=CNY', timeout=5)
-                data = json.loads(response.read().decode())
-                if data.get('rates'):
-                    st.session_state.rates = {'CNY': 1, **data['rates']}
-                    st.session_state.rate_time = data.get('date', '')
-                    st.success("汇率更新成功！")
-        except Exception as e:
-            st.error(f"获取汇率失败: {e}")
+    # 选择换算类型
+    unit_type = st.selectbox("选择类型", ["📏 长度", "⚖️ 重量", "🌡️ 温度", "💱 货币"])
     
-    if st.session_state.rate_time:
-        st.caption(f"汇率时间: {st.session_state.rate_time}")
+    # 长度换算
+    if unit_type == "📏 长度":
+        length_units = {
+            "米": 1, "厘米": 0.01, "毫米": 0.001, 
+            "千米": 1000, "英尺": 0.3048, "英寸": 0.0254, "英里": 1609.344
+        }
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            length_val = st.number_input("数值", value=1.0, min_value=0.0, key="length_val")
+        with col2:
+            length_from = st.selectbox("从", list(length_units.keys()), key="length_from")
+        with col3:
+            length_to = st.selectbox("到", list(length_units.keys()), index=1, key="length_to")
+        
+        result = length_val * length_units[length_from] / length_units[length_to]
+        st.markdown(f"""
+        <div class="result-highlight" style="margin-top:20px;">
+            {length_to}: {result:.6f}
+        </div>
+        """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        amount = st.number_input("金额", value=1.0, min_value=0.0)
-    with col2:
-        from_curr = st.selectbox("从", ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP', 'KRW'], index=0)
-    with col3:
-        to_curr = st.selectbox("到", ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP', 'KRW'], index=1)
+    # 重量换算
+    elif unit_type == "⚖️ 重量":
+        weight_units = {
+            "公斤": 1, "克": 0.001, "毫克": 0.000001,
+            "斤": 0.5, "磅": 0.453592, "盎司": 0.0283495, "吨": 1000
+        }
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            weight_val = st.number_input("数值", value=1.0, min_value=0.0, key="weight_val")
+        with col2:
+            weight_from = st.selectbox("从", list(weight_units.keys()), key="weight_from")
+        with col3:
+            weight_to = st.selectbox("到", list(weight_units.keys()), index=1, key="weight_to")
+        
+        result = weight_val * weight_units[weight_from] / weight_units[weight_to]
+        st.markdown(f"""
+        <div class="result-highlight" style="margin-top:20px;">
+            {weight_to}: {result:.6f}
+        </div>
+        """, unsafe_allow_html=True)
     
-    from_rate = st.session_state.rates.get(from_curr, 1)
-    to_rate = st.session_state.rates.get(to_curr, 1)
-    result = (amount / from_rate) * to_rate
+    # 温度换算
+    elif unit_type == "🌡️ 温度":
+        st.markdown("**温度转换公式：**")
+        st.latex(r"C = (F - 32) \times \frac{5}{9}")
+        st.latex(r"K = C + 273.15")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            temp_val = st.number_input("输入温度", value=0.0, key="temp_val")
+        with col2:
+            temp_from = st.selectbox("从", ["摄氏度(°C)", "华氏度(°F)", "开尔文(K)"], key="temp_from")
+        
+        temp_to = st.selectbox("到", ["摄氏度(°C)", "华氏度(°F)", "开尔文(K)"], index=1, key="temp_to")
+        
+        # 转换为摄氏度
+        if temp_from == "摄氏度(°C)":
+            celsius = temp_val
+        elif temp_from == "华氏度(°F)":
+            celsius = (temp_val - 32) * 5/9
+        else:  # 开尔文
+            celsius = temp_val - 273.15
+        
+        # 从摄氏度转换为目标
+        if temp_to == "摄氏度(°C)":
+            result = celsius
+        elif temp_to == "华氏度(°F)":
+            result = celsius * 9/5 + 32
+        else:  # 开尔文
+            result = celsius + 273.15
+        
+        st.markdown(f"""
+        <div class="result-highlight" style="margin-top:20px;">
+            {temp_to.split('(')[0]}: {result:.2f}
+        </div>
+        """, unsafe_allow_html=True)
     
-    curr_names = {'CNY': '人民币', 'USD': '美元', 'EUR': '欧元', 'JPY': '日元', 'HKD': '港币', 'GBP': '英镑', 'KRW': '韩元'}
-    st.markdown(f"""
-    <div class="result-highlight" style="margin-top:20px;">
-        {curr_names[to_curr]}: {result:.4f}
-    </div>
-    """, unsafe_allow_html=True)
+    # 货币换算
+    elif unit_type == "💱 货币":
+        if st.button("🔄 刷新汇率"):
+            try:
+                with st.spinner("正在获取汇率..."):
+                    response = urllib.request.urlopen('https://api.frankfurter.dev/v1/latest?base=CNY', timeout=5)
+                    data = json.loads(response.read().decode())
+                    if data.get('rates'):
+                        st.session_state.rates = {'CNY': 1, **data['rates']}
+                        st.session_state.rate_time = data.get('date', '')
+                        st.success("汇率更新成功！")
+            except Exception as e:
+                st.error(f"获取汇率失败: {e}")
+        
+        if st.session_state.rate_time:
+            st.caption(f"汇率时间: {st.session_state.rate_time}")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            amount = st.number_input("金额", value=1.0, min_value=0.0, key="currency_val")
+        with col2:
+            from_curr = st.selectbox("从", ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP', 'KRW'], index=0, key="curr_from")
+        with col3:
+            to_curr = st.selectbox("到", ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP', 'KRW'], index=1, key="curr_to")
+        
+        from_rate = st.session_state.rates.get(from_curr, 1)
+        to_rate = st.session_state.rates.get(to_curr, 1)
+        result = (amount / from_rate) * to_rate
+        
+        curr_names = {'CNY': '人民币', 'USD': '美元', 'EUR': '欧元', 'JPY': '日元', 'HKD': '港币', 'GBP': '英镑', 'KRW': '韩元'}
+        st.markdown(f"""
+        <div class="result-highlight" style="margin-top:20px;">
+            {curr_names[to_curr]}: {result:.4f}
+        </div>
+        """, unsafe_allow_html=True)
 
 # ========== 健康计算 ==========
 elif st.session_state.active_tab == 'health':
