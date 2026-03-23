@@ -106,6 +106,14 @@ st.markdown("""
         padding: 10px;
         font-size: 14px;
     }
+    
+    /* 计算器按钮网格 */
+    div[data-testid="stHorizontalBlock"] {
+        gap: 8px !important;
+    }
+    div[data-testid="stHorizontalBlock"] > div {
+        padding: 4px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
