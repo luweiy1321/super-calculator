@@ -204,80 +204,69 @@
             event.target.classList.add('active');
         }
         
-        // 计算器
+// 计算器
         let display = '0';
-        let currentInput = '';
-        let previousInput = '';
-        let operator = '';
+        let fullExpression = '';
+        let justCalculated = false;
         
         function updateDisplay() {
-            document.getElementById('display').textContent = currentInput || display;
+            document.getElementById('display').textContent = display;
+        }
+        
+        function addNumber(num) {
+            if (justCalculated) {
+                fullExpression = '';
+                justCalculated = false;
+            }
+            fullExpression += num;
+            display = fullExpression;
+            updateDisplay();
         }
         
         function addOperator(op) {
-            if (currentInput !== '') {
-                // 如果有未计算的先计算
-                if (previousInput && operator && currentInput) {
-                    calculate();
-                }
-                previousInput = currentInput;
-                currentInput = '';
+            if (fullExpression === '' && op !== '-') return;
+            if (['+', '-', '*', '/', '%'].includes(fullExpression.slice(-1))) {
+                fullExpression = fullExpression.slice(0, -1) + op;
+            } else {
+                fullExpression += op;
             }
-            operator = op;
-            // 显示算式
-            display = previousInput + ' ' + operator;
+            display = fullExpression;
             updateDisplay();
         }
         
         function calculate() {
-            if (!previousInput || !operator) return;
-            // 如果没有输入第二个数，用第一个数
-            let b = currentInput ? parseFloat(currentInput) : parseFloat(previousInput);
-            let a = parseFloat(previousInput);
-            let result;
-            switch(operator) {
-                case '+': result = a + b; break;
-                case '-': result = a - b; break;
-                case '*': result = a * b; break;
-                case '/': result = b !== 0 ? a / b : 0; break;
-                case '%': result = a % b; break;
-            }
-            // 标记已计算，下次输入新数字时清空
-            previousInput = String(result);
-            currentInput = '';
-            operator = '';
-            display = previousInput;
-            justCalculated = true;
-            updateDisplay();
-        }
-        
-        let justCalculated = false;
-        
-        function addNumber(num) {
-            // 如果刚计算完，输入新数字时清空
-            if (justCalculated) {
-                display = '0';
-                justCalculated = false;
-            }
-            if (currentInput === '' && num !== '.') {
-                currentInput = num;
-            } else if (num === '.' && currentInput.includes('.')) {
-                return;
-            } else {
-                currentInput += num;
+            if (!fullExpression) return;
+            try {
+                let expr = fullExpression.replace(/×/g, '*').replace(/÷/g, '/');
+                let result = eval(expr);
+                if (!isFinite(result) || isNaN(result)) {
+                    display = 'Error';
+                } else {
+                    display = String(result);
+                    fullExpression = String(result);
+                    justCalculated = true;
+                }
+            } catch (e) {
+                display = 'Error';
+                fullExpression = '';
             }
             updateDisplay();
         }
         
         function clearDisplay() {
             display = '0';
-            currentInput = '';
-            previousInput = '';
-            operator = '';
+            fullExpression = '';
+            justCalculated = false;
             updateDisplay();
         }
         
         function deleteChar() {
+            if (fullExpression.length > 0) {
+                fullExpression = fullExpression.slice(0, -1);
+                display = fullExpression || '0';
+                updateDisplay();
+            }
+        }
             if (currentInput.length > 1) {
                 currentInput = currentInput.slice(0, -1);
             } else {
