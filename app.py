@@ -13,7 +13,10 @@ THEMES = {
     "🖤 经典黑": {"bg": "#000000", "num": "#333333", "func": "#a5a5a5", "op": "#ff9500", "eq": "#ff9500"},
 }
 
-theme_name = st.selectbox("🎨 主题", list(THEMES.keys()), index=4)
+# 主题选择 - 持久化
+if 'saved_theme' not in st.session_state:
+    st.session_state.saved_theme = "🖤 经典黑"
+theme_name = st.selectbox("🎨 主题", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.saved_theme), key="theme_picker", on_change=lambda: setattr(st.session_state, 'saved_theme', st.session_state.theme_picker))
 theme = THEMES[theme_name]
 t_func = theme['func']
 t_eq = theme['eq']
