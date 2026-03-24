@@ -3,28 +3,280 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>计算器</title>
+<title>超级计算器</title>
 <style>
-body{background:#000;color:#fff;font-family:sans-serif;padding:20px;text-align:center}
-h1{background:#333;padding:20px;font-size:48px;margin:0 0 10px 0}
-button{width:80px;height:80px;font-size:30px;margin:5px;border-radius:10px;border:none;background:#444;color:#fff}
-button:active{background:#666}
+* {margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a1a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:20px}
+.tab{display:flex;gap:10px;margin-bottom:15px;overflow-x:auto}
+.tab button{padding:10px 15px;background:#333;border:none;border-radius:20px;color:#fff;white-space:nowrap}
+.tab button.active{background:#007AFF}
+.calc{max-width:350px;margin:0 auto}
+.display{background:#2a2a2a;padding:20px;font-size:42px;text-align:right;border-radius:15px 15px 0 0;overflow:hidden}
+.buttons{background:#2a2a2a;padding:10px;border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.btn{padding:18px;font-size:22px;border:none;border-radius:10px;background:#444;color:#fff}
+.btn.orange{background:#ff9500}
+.btn.gray{background:#a5a5a5;color:#000}
+.hidden{display:none}
 </style>
 </head>
 <body>
-<h1 id="d">0</h1>
-<div>
-<button id="b1">1</button>
-<button id="b2">2</button>
-<button id="b3">3</button>
-<button id="beq" style="background:orange">=</button>
+<div class="tab">
+<button class="active" onclick="showTab('calc',this)">🧮 计算</button>
+<button onclick="showTab('loan',this)">🏠 房贷</button>
+<button onclick="showTab('unit',this)">🔄 换算</button>
+<button onclick="showTab('health',this)">❤️ 健康</button>
 </div>
+
+<!-- 计算器 -->
+<div id="calc" class="calc">
+<div class="display" id="display">0</div>
+<div class="buttons">
+<button class="btn gray" id="ac">AC</button>
+<button class="btn gray" id="del">⌫</button>
+<button class="btn gray" id="pct">%</button>
+<button class="btn orange" id="div">÷</button>
+<button class="btn num">7</button>
+<button class="btn num">8</button>
+<button class="btn num">9</button>
+<button class="btn orange" id="mul">×</button>
+<button class="btn num">4</button>
+<button class="btn num">5</button>
+<button class="btn num">6</button>
+<button class="btn orange" id="sub">-</button>
+<button class="btn num">1</button>
+<button class="btn num">2</button>
+<button class="btn num">3</button>
+<button class="btn orange" id="add">+</button>
+<button class="btn num" style="grid-column:span 2">0</button>
+<button class="btn num" id="dot">.</button>
+<button class="btn orange" id="eq">=</button>
+</div>
+</div>
+
+<!-- 房贷 -->
+<div id="loan" class="calc hidden">
+<div class="display" style="font-size:20px">🏠 房贷计算器</div>
+<div style="background:#2a2a2a;padding:15px;border-radius:0 0 15px 15px">
+<input id="amount" type="number" placeholder="贷款金额(万元)" value="100" style="width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px">
+<input id="rate" type="number" placeholder="年利率(%)" value="3.5" step="0.1" style="width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px">
+<select id="years" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+<option>5年</option><option>10年</option><option>15年</option><option>20年</option>
+<option selected>25年</option><option>30年</option>
+</select>
+<button onclick="calcLoan()" style="width:100%;padding:15px;background:#007AFF;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:10px">计算</button>
+<div id="loanResult" class="hidden" style="margin-top:15px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div style="background:#3a3a3a;padding:12px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#888">月供</div><div id="monthly" style="font-size:16px;color:#007AFF"></div></div>
+<div style="background:#3a3a3a;padding:12px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#888">总利息</div><div id="interest" style="font-size:16px;color:#ff9500"></div></div>
+<div style="background:#3a3a3a;padding:12px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#888">总额</div><div id="total" style="font-size:16px;color:#34c759"></div></div>
+</div>
+</div>
+</div>
+
+<!-- 换算 -->
+<div id="unit" class="calc hidden">
+<div class="display" style="font-size:20px">🔄 单位换算</div>
+<div style="background:#2a2a2a;padding:15px;border-radius:0 0 15px 15px">
+<select id="unitType" onchange="updateUnit()" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+<option value="currency">💱 货币</option>
+<option value="length">📏 长度</option>
+<option value="weight">⚖️ 重量</option>
+<option value="temp">🌡️ 温度</option>
+</select>
+<div style="display:flex;gap:5px">
+<input id="unitVal" type="number" value="1" style="flex:1;padding:12px;border-radius:8px;border:none">
+<select id="unitFrom" style="flex:1;padding:12px;border-radius:8px;border:none"></select>
+<select id="unitTo" style="flex:1;padding:12px;border-radius:8px;border:none"></select>
+</div>
+<button onclick="convertUnit()" style="width:100%;padding:15px;background:#007AFF;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:10px">换算</button>
+<div id="unitResult" style="margin-top:15px;padding:20px;background:#007AFF;border-radius:10px;text-align:center;font-size:24px"></div>
+</div>
+</div>
+
+<!-- 健康 -->
+<div id="health" class="calc hidden">
+<div class="display" style="font-size:20px">❤️ 健康计算</div>
+<div style="background:#2a2a2a;padding:15px;border-radius:0 0 15px 15px">
+<div style="display:flex;gap:10px">
+<input id="height" type="number" placeholder="身高(cm)" value="170" style="flex:1;padding:12px;border-radius:8px;border:none">
+<input id="weight" type="number" placeholder="体重(kg)" value="65" style="flex:1;padding:12px;border-radius:8px;border:none">
+</div>
+<div style="display:flex;gap:10px;margin-top:8px">
+<input id="age" type="number" placeholder="年龄" value="30" style="flex:1;padding:12px;border-radius:8px;border:none">
+<select id="gender" style="flex:1;padding:12px;border-radius:8px;border:none"><option>男</option><option>女</option></select>
+</div>
+<select id="activity" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+<option value="1.2">久坐</option><option value="1.375">轻度</option><option value="1.55">中度</option><option value="1.725">重度</option>
+</select>
+<button onclick="calcHealth()" style="width:100%;padding:15px;background:#34c759;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:10px">计算</button>
+<div id="healthResult" class="hidden" style="margin-top:15px;padding:20px;background:#3a3a3a;border-radius:10px;text-align:center">
+<div id="bmiVal" style="font-size:48px;font-weight:bold;color:#34c759"></div>
+<div id="bmiCat" style="font-size:18px;color:#34c759"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px">
+<div style="background:#444;padding:12px;border-radius:10px"><div style="font-size:12px;color:#888">基础代谢</div><div id="bmr"></div></div>
+<div style="background:#444;padding:12px;border-radius:10px"><div style="font-size:12px;color:#888">每日消耗</div><div id="tdee"></div></div>
+</div>
+</div>
+</div>
+</div>
+
 <script>
-var e='';
-document.getElementById('b1').onclick=function(){e+='1';document.getElementById('d').innerText=e;};
-document.getElementById('b2').onclick=function(){e+='2';document.getElementById('d').innerText=e;};
-document.getElementById('b3').onclick=function(){e+='3';document.getElementById('d').innerText=e;};
-document.getElementById('beq').onclick=function(){document.getElementById('d').innerText=eval(e);};
+// 全局变量
+var expr = '';
+var justCalc = false;
+
+// Tab切换
+function showTab(id, btn) {
+  document.querySelectorAll('#calc,#loan,#unit,#health').forEach(function(el){el.classList.add('hidden')});
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.tab button').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+}
+
+// 数字键
+document.querySelectorAll('.btn.num').forEach(function(btn){
+  btn.onclick = function() {
+    if (justCalc) { expr = ''; justCalc = false; }
+    expr += btn.innerText;
+    document.getElementById('display').innerText = expr;
+  };
+});
+
+// AC
+document.getElementById('ac').onclick = function() {
+  expr = '';
+  document.getElementById('display').innerText = '0';
+};
+
+// 删除
+document.getElementById('del').onclick = function() {
+  expr = expr.slice(0,-1);
+  document.getElementById('display').innerText = expr || '0';
+};
+
+// 运算符
+var ops = {mul:'*',div:'/',add:'+',sub:'-',pct:'%'};
+for (var k in ops) {
+  document.getElementById(k).onclick = (function(key){
+    return function() {
+      if (expr && '+-*/%'.indexOf(expr.slice(-1)) > -1) {
+        expr = expr.slice(0,-1) + ops[key];
+      } else if (expr) {
+        expr += ops[key];
+      }
+      document.getElementById('display').innerText = expr.split('*').join('×').split('/').join('÷');
+    };
+  })(k);
+}
+
+// 小数点
+document.getElementById('dot').onclick = function() {
+  if (justCalc) { expr = ''; justCalc = false; }
+  var lastNum = expr.split(/[\+\-\*\/%]/).slice(-1)[0];
+  if (lastNum.indexOf('.') == -1) {
+    expr += '.';
+    document.getElementById('display').innerText = expr;
+  }
+};
+
+// 等于
+document.getElementById('eq').onclick = function() {
+  try {
+    var result = eval(expr);
+    expr = String(result);
+    document.getElementById('display').innerText = expr;
+    justCalc = true;
+  } catch(e) {
+    document.getElementById('display').innerText = 'Error';
+    expr = '';
+  }
+};
+
+// 房贷计算
+function calcLoan() {
+  var amount = parseFloat(document.getElementById('amount').value) * 10000;
+  var rate = parseFloat(document.getElementById('rate').value) / 100 / 12;
+  var years = parseInt(document.getElementById('years').value);
+  var months = years * 12;
+  var monthly = amount * rate * Math.pow(1+rate,months) / (Math.pow(1+rate,months) - 1);
+  var total = monthly * months;
+  var interest = total - amount;
+  document.getElementById('monthly').innerText = monthly.toFixed(2);
+  document.getElementById('interest').innerText = Math.round(interest).toLocaleString();
+  document.getElementById('total').innerText = Math.round(total).toLocaleString();
+  document.getElementById('loanResult').classList.remove('hidden');
+  document.getElementById('loanResult').style.display = 'grid';
+}
+
+// 单位换算
+var units = {
+  currency:['人民币','美元','欧元','日元','港币','英镑','韩元'],
+  length:['米','厘米','毫米','英尺','英寸'],
+  weight:['公斤','克','斤','磅','盎司'],
+  temp:['摄氏度','华氏度','开尔文']
+};
+var rates = {CNY:1,USD:7.2,EUR:0.95,JPY:150,HKD:0.9,GBP:0.85,KRW:190};
+
+function updateUnit() {
+  var type = document.getElementById('unitType').value;
+  var opts = units[type];
+  var from = document.getElementById('unitFrom');
+  var to = document.getElementById('unitTo');
+  from.innerHTML = ''; to.innerHTML = '';
+  opts.forEach(function(u,i){from.innerHTML += '<option value="'+i+'">'+u+'</option>';});
+  opts.forEach(function(u,i){to.innerHTML += '<option value="'+i+'">'+u+'</option>';});
+  if (type == 'currency') to.selectedIndex = 1;
+}
+updateUnit();
+
+function convertUnit() {
+  var type = document.getElementById('unitType').value;
+  var val = parseFloat(document.getElementById('unitVal').value);
+  var from = parseInt(document.getElementById('unitFrom').value);
+  var to = parseInt(document.getElementById('unitTo').value);
+  var result;
+  
+  if (type == 'currency') {
+    var curr = ['CNY','USD','EUR','JPY','HKD','GBP','KRW'];
+    result = (val / rates[curr[from]]) * rates[curr[to]];
+    document.getElementById('unitResult').innerText = result.toFixed(4);
+  } else if (type == 'length') {
+    var len = [1,0.01,0.001,0.3048,0.0254];
+    result = val * len[from] / len[to];
+    document.getElementById('unitResult').innerText = result.toFixed(6);
+  } else if (type == 'weight') {
+    var wgt = [1,0.001,0.5,0.453592,0.0283495];
+    result = val * wgt[from] / wgt[to];
+    document.getElementById('unitResult').innerText = result.toFixed(6);
+  } else {
+    var c = from==0?val:(from==1?(val-32)*5/9:val-273.15);
+    result = to==0?c:(to==1?c*9/5+32:c+273.15);
+    document.getElementById('unitResult').innerText = result.toFixed(2) + '°';
+  }
+}
+
+// 健康计算
+function calcHealth() {
+  var h = parseFloat(document.getElementById('height').value);
+  var w = parseFloat(document.getElementById('weight').value);
+  var a = parseFloat(document.getElementById('age').value);
+  var g = document.getElementById('gender').value;
+  var act = parseFloat(document.getElementById('activity').value);
+  
+  var bmi = w / Math.pow(h/100, 2);
+  var cat = bmi < 18.5 ? '偏瘦' : bmi < 24 ? '正常' : bmi < 28 ? '偏胖' : '肥胖';
+  var color = bmi < 18.5 ? '#007AFF' : bmi < 24 ? '#34c759' : bmi < 28 ? '#ff9500' : '#ff3b30';
+  
+  var bmr = g == '男' ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161;
+  var tdee = bmr * act;
+  
+  document.getElementById('bmiVal').innerText = bmi.toFixed(1);
+  document.getElementById('bmiVal').style.color = color;
+  document.getElementById('bmiCat').innerText = cat;
+  document.getElementById('bmiCat').style.color = color;
+  document.getElementById('bmr').innerText = Math.round(bmr);
+  document.getElementById('tdee').innerText = Math.round(tdee);
+  document.getElementById('healthResult').classList.remove('hidden');
+}
 </script>
 </body>
 </html>
