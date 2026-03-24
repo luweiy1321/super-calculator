@@ -4,166 +4,195 @@ import json
 
 st.set_page_config(page_title="计算器", page_icon="🧮", layout="centered")
 
-# 现代简洁风格 CSS
-st.markdown("""
+# 主题配置
+THEMES = {
+    "💜 紫罗蓝": {
+        "bg": "#1c1c1e",
+        "display_bg": "#000000",
+        "display_text": "#ffffff",
+        "keypad_bg": "#1c1c1e",
+        "num_bg": "#2c2c2e",
+        "num_text": "#ffffff",
+        "func_bg": "#636366",
+        "func_text": "#000000",
+        "op_bg": "#a8a8b3",
+        "op_text": "#000000",
+        "eq_bg": "#ff9f0a",
+        "eq_text": "#ffffff",
+    },
+    "🌸 樱花粉": {
+        "bg": "#2d1f2d",
+        "display_bg": "#1a1a1a",
+        "display_text": "#ffffff",
+        "keypad_bg": "#2d1f2d",
+        "num_bg": "#3d2d3d",
+        "num_text": "#ffffff",
+        "func_bg": "#5d4d5d",
+        "func_text": "#ffffff",
+        "op_bg": "#d4a5b9",
+        "op_text": "#1a1a1a",
+        "eq_bg": "#ff6b9d",
+        "eq_text": "#ffffff",
+    },
+    "🌊 海洋蓝": {
+        "bg": "#0d1f2d",
+        "display_bg": "#0a1520",
+        "display_text": "#ffffff",
+        "keypad_bg": "#0d1f2d",
+        "num_bg": "#1d2f3d",
+        "num_text": "#ffffff",
+        "func_bg": "#3d5a6d",
+        "func_text": "#ffffff",
+        "op_bg": "#5da4b4",
+        "op_text": "#0a1520",
+        "eq_bg": "#4ecdc4",
+        "eq_text": "#0a1520",
+    },
+    "🍋 柠檬黄": {
+        "bg": "#1f1f1f",
+        "display_bg": "#000000",
+        "display_text": "#ffffff",
+        "keypad_bg": "#1f1f1f",
+        "num_bg": "#2d2d2d",
+        "num_text": "#ffffff",
+        "func_bg": "#4d4d4d",
+        "func_text": "#ffffff",
+        "op_bg": "#f7dc6f",
+        "op_text": "#1f1f1f",
+        "eq_bg": "#f39c12",
+        "eq_text": "#ffffff",
+    },
+    "🖤 经典黑": {
+        "bg": "#000000",
+        "display_bg": "#000000",
+        "display_text": "#ffffff",
+        "keypad_bg": "#000000",
+        "num_bg": "#333333",
+        "num_text": "#ffffff",
+        "func_bg": "#a5a5a5",
+        "func_text": "#000000",
+        "op_bg": "#ff9500",
+        "op_text": "#ffffff",
+        "eq_bg": "#ff9500",
+        "eq_text": "#ffffff",
+    },
+}
+
+# 选择主题
+theme_name = st.selectbox("🎨 主题", list(THEMES.keys()), index=0)
+theme = THEMES[theme_name]
+
+# CSS
+st.markdown(f"""
 <style>
-    .stApp { 
-        background: #f5f5f7; 
-        padding: 0;
-    }
+    .stApp {{ background: {theme['bg']}; padding: 10px; }}
     
-    /* 计算器区域 */
-    .calc-section {
-        background: white;
+    .calc-container {{
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin: 10px;
-    }
+        max-width: 400px;
+        margin: 0 auto;
+    }}
     
-    .calc-display {
-        background: white;
-        padding: 30px 20px;
+    .calc-display {{
+        background: {theme['display_bg']};
+        padding: 30px 20px 60px;
         text-align: right;
-        font-size: 64px;
+        font-size: 56px;
         font-weight: 300;
-        color: #1c1c1e;
-        min-height: 120px;
+        color: {theme['display_text']};
+        min-height: 100px;
         display: flex;
         align-items: flex-end;
         justify-content: flex-end;
         word-break: break-all;
-    }
+    }}
     
-    .calc-grid {
+    .calc-formula {{
+        font-size: 24px;
+        color: {theme['display_text']}66;
+    }}
+    
+    .calc-grid {{
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1px;
-        background: #d1d1d6;
-    }
+        gap: 10px;
+        padding: 10px;
+    }}
     
-    .calc-btn {
+    .calc-btn {{
         border: none;
-        font-size: 28px;
-        height: 70px;
+        border-radius: 16px;
+        font-size: 26px;
+        height: 65px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.1s;
-    }
+        transition: opacity 0.1s;
+    }}
     
-    .calc-btn:active { opacity: 0.6; }
+    .calc-btn:active {{ opacity: 0.7; }}
     
-    /* 数字按钮 - 白色 */
-    .num-btn { background: white; color: #1c1c1e; }
+    .num-btn {{ background: {theme['num_bg']}; color: {theme['num_text']}; }}
+    .func-btn {{ background: {theme['func_bg']}; color: {theme['func_text']}; }}
+    .op-btn {{ background: {theme['op_bg']}; color: {theme['op_text']}; }}
+    .eq-btn {{ background: {theme['eq_bg']}; color: {theme['eq_text']}; }}
     
-    /* 操作符按钮 - 蓝色 */
-    .op-btn { background: #007aff; color: white; }
+    .zero-btn {{ grid-column: span 2; justify-content: flex-start; padding-left: 24px; }}
     
-    /* 功能按钮 - 浅灰 */
-    .func-btn { background: #a5a5a5; color: #1c1c1e; }
-    
-    /* 0 按钮 */
-    .zero-btn { 
-        grid-column: span 2; 
-        justify-content: flex-start;
-        padding-left: 30px;
-    }
-    
-    /* 功能页签 */
-    .tab-bar {
-        display: flex;
-        background: #f5f5f7;
-        padding: 10px;
-        gap: 10px;
-    }
-    
-    .tab-item {
-        flex: 1;
-        padding: 12px;
-        text-align: center;
-        border-radius: 12px;
-        font-size: 14px;
-        color: #8e8e93;
-        background: white;
-    }
-    
-    .tab-item.active {
-        background: #007aff;
-        color: white;
-    }
-    
-    /* 卡片样式 */
-    .content-card {
-        background: white;
+    .content-card {{
+        background: {theme['num_bg']};
         border-radius: 16px;
         padding: 20px;
-        margin: 10px;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-    }
+        margin: 10px auto;
+        max-width: 400px;
+    }}
     
-    .card-title {
+    .card-title {{
         font-size: 18px;
         font-weight: 600;
-        color: #1c1c1e;
+        color: {theme['num_text']};
         margin-bottom: 15px;
-    }
+    }}
     
-    .input-ios {
-        background: #f5f5f7;
+    .input-ios {{
+        background: {theme['func_bg']};
         border: none;
         border-radius: 10px;
-        color: #1c1c1e;
+        color: {theme['num_text']};
         padding: 14px;
         font-size: 16px;
         width: 100%;
-    }
+    }}
     
-    .select-ios {
-        background: #f5f5f7;
-        border: none;
-        border-radius: 10px;
-        color: #1c1c1e;
-        padding: 14px;
-        font-size: 16px;
-    }
-    
-    .btn-blue {
-        background: #007aff;
-        color: white;
+    .btn-action {{
+        background: {theme['op_bg']};
+        color: {theme['op_text']};
         border: none;
         border-radius: 12px;
         padding: 14px;
         font-size: 16px;
         width: 100%;
-    }
+    }}
     
-    .result-grid {
+    .result-grid {{
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-    }
+    }}
     
-    .result-card {
-        background: #f5f5f7;
+    .result-card {{
+        background: {theme['func_bg']};
         border-radius: 12px;
         padding: 15px;
         text-align: center;
-    }
+    }}
     
-    .result-label { font-size: 12px; color: #8e8e93; }
-    .result-value { font-size: 20px; font-weight: 600; color: #007aff; margin-top: 5px; }
+    .result-label {{ font-size: 12px; color: {theme['num_text']}99; }}
+    .result-value {{ font-size: 20px; font-weight: 600; color: {theme['op_bg']}; margin-top: 5px; }}
     
-    .result-big {
-        background: #f5f5f7;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        margin-top: 15px;
-    }
-    
-    .result-big-value { font-size: 28px; font-weight: 600; color: #34c759; }
+    .tab-radio .stRadio > div {{ flex-direction: row; gap: 8px; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -179,14 +208,26 @@ if 'loan_result' not in st.session_state:
 if 'health_result' not in st.session_state:
     st.session_state.health_result = None
 
-# Tab 选择
-tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="tab_main")
+# Tab
+tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="tab_main", label_visibility="collapsed")
 tab_map = {'🧮': 'calc', '🏠': 'loan', '🔄': 'unit', '❤️': 'health'}
 
 # ========== 计算器 ==========
 if tab_map[tab] == 'calc':
-    st.markdown('<div class="calc-section">', unsafe_allow_html=True)
-    st.markdown(f'<div class="calc-display">{st.session_state.display}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="calc-container">', unsafe_allow_html=True)
+    
+    # 显示区和公式
+    display_val = st.session_state.display
+    if st.session_state.expression and st.session_state.expression != st.session_state.display:
+        st.markdown(f'''
+        <div class="calc-display">
+            <div class="calc-formula">{st.session_state.expression}</div>
+            {display_val}
+        </div>
+        ''', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="calc-display">{display_val}</div>', unsafe_allow_html=True)
+    
     st.markdown('<div class="calc-grid">', unsafe_allow_html=True)
     
     # 第一行
@@ -285,8 +326,7 @@ if tab_map[tab] == 'calc':
     # 第五行
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown('<div class="calc-btn num-btn zero-btn">0</div>', unsafe_allow_html=True)
-        if st.button("0", key="0"):
+        if st.button("0", key="0", help="0"):
             st.session_state.expression += '0'
             st.session_state.display = st.session_state.expression
             st.rerun()
@@ -333,8 +373,8 @@ elif tab_map[tab] == 'loan':
         st.markdown(f'''
         <div class="result-grid">
             <div class="result-card"><div class="result-label">月供</div><div class="result-value">{r['monthly']:.2f}</div></div>
-            <div class="result-card"><div class="result-label">总利息</div><div class="result-value" style="color:#ff9500">{r['interest']:.0f}</div></div>
-            <div class="result-card"><div class="result-label">总还款</div><div class="result-value" style="color:#34c759">{r['total']:.0f}</div></div>
+            <div class="result-card"><div class="result-label">总利息</div><div class="result-value">{r['interest']:.0f}</div></div>
+            <div class="result-card"><div class="result-label">总还款</div><div class="result-value">{r['total']:.0f}</div></div>
         </div>
         ''', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -364,7 +404,7 @@ elif tab_map[tab] == 'unit':
         tr = st.session_state.rates.get(to, 1)
         res = (amt / fr) * tr
         names = {'CNY': '人民币', 'USD': '美元', 'EUR': '欧元', 'JPY': '日元', 'HKD': '港币', 'GBP': '英镑', 'KRW': '韩元'}
-        st.markdown(f'<div class="result-big"><div class="result-label">{names[to]}</div><div class="result-big-value">{res:.4f}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-card" style="margin-top:15px;"><div class="result-label">{names[to]}</div><div class="result-value" style="font-size:28px;">{res:.4f}</div></div>', unsafe_allow_html=True)
     
     elif unit_type == "📏 长度":
         u = {"米": 1, "厘米": 0.01, "毫米": 0.001, "千米": 1000, "英尺": 0.3048, "英寸": 0.0254}
@@ -372,7 +412,7 @@ elif tab_map[tab] == 'unit':
         with c1: val = st.number_input("数值", value=1.0, key="len_val")
         with c2: frm = st.selectbox("从", list(u.keys()), key="len_from")
         with c3: to = st.selectbox("到", list(u.keys()), index=1, key="len_to")
-        st.markdown(f'<div class="result-big"><div class="result-big-value">{val*u[frm]/u[to]:.6f}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-card" style="margin-top:15px;"><div class="result-value">{val*u[frm]/u[to]:.6f}</div></div>', unsafe_allow_html=True)
     
     elif unit_type == "⚖️ 重量":
         u = {"公斤": 1, "克": 0.001, "斤": 0.5, "磅": 0.453592, "盎司": 0.0283495}
@@ -380,7 +420,7 @@ elif tab_map[tab] == 'unit':
         with c1: val = st.number_input("数值", value=1.0, key="wgt_val")
         with c2: frm = st.selectbox("从", list(u.keys()), key="wgt_from")
         with c3: to = st.selectbox("到", list(u.keys()), index=1, key="wgt_to")
-        st.markdown(f'<div class="result-big"><div class="result-big-value">{val*u[frm]/u[to]:.6f}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-card" style="margin-top:15px;"><div class="result-value">{val*u[frm]/u[to]:.6f}</div></div>', unsafe_allow_html=True)
     
     elif unit_type == "🌡️ 温度":
         c1, c2 = st.columns(2)
@@ -390,7 +430,7 @@ elif tab_map[tab] == 'unit':
         
         c = val if frm=="摄氏度" else (val-32)*5/9 if frm=="华氏度" else val-273.15
         res = c if to=="摄氏度" else c*9/5+32 if to=="华氏度" else c+273.15
-        st.markdown(f'<div class="result-big"><div class="result-big-value">{res:.2f}°</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-card" style="margin-top:15px;"><div class="result-value">{res:.2f}°</div></div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -409,7 +449,7 @@ elif tab_map[tab] == 'health':
     if st.button("计算", key="calc_health"):
         bmi = w / ((h/100)**2)
         cat = "偏瘦" if bmi < 18.5 else "正常" if bmi < 24 else "偏胖" if bmi < 28 else "肥胖"
-        color = "#ff9500" if bmi < 18.5 else "#34c759" if bmi < 24 else "#ff9500" if bmi < 28 else "#ff3b30"
+        color = theme['op_bg']
         bmr = 10*w + 6.25*h - 5*age + (5 if gender=="男" else -161)
         tdee = bmr * float(act.split("(")[1].split(")")[0])
         st.session_state.health_result = {'bmi': bmi, 'cat': cat, 'color': color, 'bmr': bmr, 'tdee': tdee}
