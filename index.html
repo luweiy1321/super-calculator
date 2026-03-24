@@ -3,18 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>测试</title>
+<title>计算器</title>
+<style>
+body{background:#000;color:#fff;font-family:sans-serif;padding:20px;text-align:center}
+h1{background:#333;padding:20px;font-size:48px;margin:0 0 10px 0}
+button{width:80px;height:80px;font-size:30px;margin:5px;border-radius:10px;border:none;background:#444;color:#fff}
+button:active{background:#666}
+</style>
 </head>
-<body style="background:#000;color:#fff;font-family:sans-serif;padding:20px;text-align:center">
-<h1 id="display">0</h1>
-<button onclick="addNum('1')" style="padding:20px;font-size:30px">1</button>
-<button onclick="addNum('2')" style="padding:20px;font-size:30px">2</button>
-<button onclick="addNum('3')" style="padding:20px;font-size:30px">3</button>
-<button onclick="calc()" style="padding:20px;font-size:30px;background:orange">=</button>
+<body>
+<h1 id="d">0</h1>
+<div>
+<button id="b1">1</button>
+<button id="b2">2</button>
+<button id="b3">3</button>
+<button id="beq" style="background:orange">=</button>
+</div>
 <script>
-let expr = '';
-function addNum(n) { expr += n; document.getElementById('display').innerText = expr; }
-function calc() { document.getElementById('display').innerText = eval(expr); }
+var e='';
+document.getElementById('b1').onclick=function(){e+='1';document.getElementById('d').innerText=e;};
+document.getElementById('b2').onclick=function(){e+='2';document.getElementById('d').innerText=e;};
+document.getElementById('b3').onclick=function(){e+='3';document.getElementById('d').innerText=e;};
+document.getElementById('beq').onclick=function(){document.getElementById('d').innerText=eval(e);};
 </script>
 </body>
 </html>
