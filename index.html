@@ -214,7 +214,51 @@
             document.getElementById('display').textContent = currentInput || display;
         }
         
+        function addOperator(op) {
+            if (currentInput !== '') {
+                // 如果有未计算的先计算
+                if (previousInput && operator && currentInput) {
+                    calculate();
+                }
+                previousInput = currentInput;
+                currentInput = '';
+            }
+            operator = op;
+            // 显示算式
+            display = previousInput + ' ' + operator;
+            updateDisplay();
+        }
+        
+        function calculate() {
+            if (!previousInput || !operator) return;
+            // 如果没有输入第二个数，用第一个数
+            let b = currentInput ? parseFloat(currentInput) : parseFloat(previousInput);
+            let a = parseFloat(previousInput);
+            let result;
+            switch(operator) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = b !== 0 ? a / b : 0; break;
+                case '%': result = a % b; break;
+            }
+            // 标记已计算，下次输入新数字时清空
+            previousInput = String(result);
+            currentInput = '';
+            operator = '';
+            display = previousInput;
+            justCalculated = true;
+            updateDisplay();
+        }
+        
+        let justCalculated = false;
+        
         function addNumber(num) {
+            // 如果刚计算完，输入新数字时清空
+            if (justCalculated) {
+                display = '0';
+                justCalculated = false;
+            }
             if (currentInput === '' && num !== '.') {
                 currentInput = num;
             } else if (num === '.' && currentInput.includes('.')) {
@@ -222,32 +266,6 @@
             } else {
                 currentInput += num;
             }
-            updateDisplay();
-        }
-        
-        function addOperator(op) {
-            if (currentInput !== '') {
-                previousInput = currentInput;
-                currentInput = '';
-            }
-            operator = op;
-        }
-        
-        function calculate() {
-            if (!previousInput || !currentInput || !operator) return;
-            let result;
-            const a = parseFloat(previousInput);
-            const b = parseFloat(currentInput);
-            switch(operator) {
-                case '+': result = a + b; break;
-                case '-': result = a - b; break;
-                case '*': result = a * b; break;
-                case '/': result = a / b; break;
-                case '%': result = a % b; break;
-            }
-            currentInput = String(result);
-            operator = '';
-            previousInput = '';
             updateDisplay();
         }
         
