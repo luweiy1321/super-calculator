@@ -13,71 +13,44 @@ THEMES = {
     "🖤 经典黑": {"bg": "#000000", "num": "#333333", "func": "#a5a5a5", "op": "#ff9500", "eq": "#ff9500"},
 }
 
-# 主题选择 - 持久化
+# 主题选择
 if 'saved_theme' not in st.session_state:
     st.session_state.saved_theme = "🖤 经典黑"
-theme_name = st.selectbox("🎨 主题", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.saved_theme), key="theme_picker", on_change=lambda: setattr(st.session_state, 'saved_theme', st.session_state.theme_picker))
+theme_name = st.selectbox("🎨", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.saved_theme), key="tp", on_change=lambda: setattr(st.session_state, 'saved_theme', st.session_state.tp))
 theme = THEMES[theme_name]
 t_num, t_func, t_op, t_eq, t_bg = theme['num'], theme['func'], theme['op'], theme['eq'], theme['bg']
 
-# CSS - 按钮颜色配套
+# CSS - 圆形按钮
 st.markdown(f"""
 <style>
     .stApp {{ background: {t_bg}; }}
-    .wrap {{ max-width: 350px; margin: 0 auto; }}
-    .display {{ background: {t_num}; color: white; padding: 20px; font-size: 42px; text-align: right; border-radius: 20px 20px 0 0; }}
-    .grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; background: {t_bg}; border-radius: 0 0 20px 20px; }}
-    .card {{ background: {t_num}; border-radius: 16px; padding: 15px; margin: 10px auto; max-width: 350px; }}
+    .wrap {{ max-width: 320px; margin: 0 auto; padding-bottom: 50px; }}
+    .display {{ background: {t_num}; color: white; padding: 15px 20px; font-size: 40px; text-align: right; border-radius: 15px; margin-bottom: 10px; }}
+    
+    /* 圆形按钮网格 */
+    .btn-row {{ display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 8px; }}
+    .round-btn {{
+        width: 65px; height: 65px;
+        border-radius: 50% !important;
+        border: none;
+        font-size: 22px;
+        display: flex; align-items: center; justify-content: center;
+    }}
+    
+    /* 数字按钮 */
+    .btn-num {{ background: {t_num} !important; color: white !important; }}
+    /* 功能按钮 */
+    .btn-func {{ background: {t_func} !important; color: black !important; }}
+    /* 操作符 */
+    .btn-op {{ background: {t_op} !important; color: black !important; }}
+    /* 等号 */
+    .btn-eq {{ background: {t_eq} !important; color: white !important; }}
+    
+    .card {{ background: {t_num}; border-radius: 15px; padding: 15px; margin: 10px auto; max-width: 320px; }}
     .title {{ font-size: 16px; font-weight: 600; color: white; margin-bottom: 12px; }}
     
-    /* 按钮统一样式 */
-    .stButton > button {{
-        border-radius: 50% !important;
-        height: 60px !important;
-        font-size: 20px !important;
-        border: none !important;
-    }}
-    
-    /* 数字按钮 7,8,9,4,5,6,1,2,3,0,. */
-    div[data-testid="stHorizontalBlock"]:nth-of-type(3) .stButton > button:not(:first-child):not(:nth-child(5)),
-    div[data-testid="stHorizontalBlock"]:nth-of-type(4) .stButton > button,
-    div[data-testid="stHorizontalBlock"]:nth-of-type(5) .stButton > button,
-    div[data-testid="stHorizontalBlock"]:nth-of-type(6) .stButton > button:not(:last-child) {{
-        background: {t_num} !important;
-        color: white !important;
-    }}
-    
-    /* 功能按钮 AC, ±, % */
-    div[data-testid="stHorizontalBlock"]:nth-of-type(2) .stButton > button {{
-        background: {t_func} !important;
-        color: black !important;
-    }}
-    
-    /* 操作符 ÷, ×, -, + */
-    div[data-testid="stHorizontalBlock"]:nth-of-type(2) .stButton > button:last-child,
-    div[data-testid="stHorizontalBlock"]:nth-of-type(3) .stButton > button:last-child,
-    div[data-testid="stHorizontalBlock"]:nth-of-type(4) .stButton > button:last-child,
-    div[data-testid="stHorizontalBlock"]:nth-of-type(5) .stButton > button:last-child {{
-        background: {t_op} !important;
-        color: black !important;
-    }}
-    
-    /* 等号 = */
-    div[data-testid="stHorizontalBlock"]:nth-of-type(6) .stButton > button:last-child {{
-        background: {t_eq} !important;
-        color: white !important;
-    }}
-    
-    /* 强制4列 */
-    [data-testid="stHorizontalBlock"] {{
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 8px !important;
-    }}
-    [data-testid="stColumn"] {{
-        min-width: auto !important;
-    }}
-    [data-testid="stColumn"]:nth-child(n+5) {{
+    /* 隐藏底部图标 */
+    .streamlit-bottom {{
         display: none !important;
     }}
 </style>
@@ -87,27 +60,59 @@ st.markdown(f"""
 for k, v in [('display','0'),('expression',''),('rates',{'CNY':1,'USD':7.2,'EUR':0.95,'JPY':150,'HKD':0.9,'GBP':0.85,'KRW':190}),('loan_result',None),('health_result',None)]:
     if k not in st.session_state: st.session_state[k] = v
 
-tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="tab1")
+tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="t1")
 tm = {'🧮': 0, '🏠': 1, '🔄': 2, '❤️': 3}
 
 # 计算器
 if tm[tab] == 0:
     st.markdown('<div class="wrap">', unsafe_allow_html=True)
     st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="grid">', unsafe_allow_html=True)
     
-    btns = [('AC',0),('±',1),('%',2),('÷',3),('7',4),('8',5),('9',6),('×',7),('4',8),('5',9),('6',10),('-',11),('1',12),('2',13),('3',14),('+',15),('0',16),('.',17),('=',18)]
-    cols = st.columns(4)
-    for lbl, idx in btns:
-        with cols[idx % 4]:
-            if st.button(lbl, key=f"b{idx}", use_container_width=True):
-                if lbl == 'AC': st.session_state.display='0'; st.session_state.expression=''
-                elif lbl == '±': st.session_state.expression='-'+st.session_state.expression; st.session_state.display=st.session_state.expression
-                elif lbl == '=': 
-                    try: st.session_state.display=str(int(eval(st.session_state.expression.replace('×','*').replace('÷','/')))) if eval(st.session_state.expression.replace('×','*').replace('÷','/'))==int(eval(st.session_state.expression.replace('×','*').replace('÷','/'))) else str(round(eval(st.session_state.expression.replace('×','*').replace('÷','/')),10)); st.session_state.expression=st.session_state.display
-                    except: st.session_state.display='Error'; st.session_state.expression=''
-                else: st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression
-                st.rerun()
+    # 行1: AC ± % ÷
+    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
+    for lbl, cls in [('AC','btn-func'),('±','btn-func'),('%','btn-func'),('÷','btn-op')]:
+        if st.button(lbl, key=f"b{lbl}", help=cls):
+            if lbl == 'AC': st.session_state.display='0'; st.session_state.expression=''
+            elif lbl == '±': st.session_state.expression='-'+st.session_state.expression; st.session_state.display=st.session_state.expression
+            else: st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 行2: 7 8 9 ×
+    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
+    for lbl, cls in [('7','btn-num'),('8','btn-num'),('9','btn-num'),('×','btn-op')]:
+        if st.button(lbl, key=f"b{lbl}"):
+            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 行3: 4 5 6 -
+    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
+    for lbl, cls in [('4','btn-num'),('5','btn-num'),('6','btn-num'),('-','btn-op')]:
+        if st.button(lbl, key=f"b{lbl}"):
+            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 行4: 1 2 3 +
+    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
+    for lbl, cls in [('1','btn-num'),('2','btn-num'),('3','btn-num'),('+','btn-op')]:
+        if st.button(lbl, key=f"b{lbl}"):
+            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 行5: 0 . =
+    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
+    cols = st.columns([2,1,1])
+    with cols[0]:
+        if st.button('0', key="b0", use_container_width=True):
+            st.session_state.expression+='0'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[1]:
+        if st.button('.', key="bdot"):
+            st.session_state.expression+='.'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[2]:
+        if st.button('=', key="beq"):
+            try: st.session_state.display=str(int(eval(st.session_state.expression.replace('×','*').replace('÷','/')))) if eval(st.session_state.expression.replace('×','*').replace('÷','/'))==int(eval(st.session_state.expression.replace('×','*').replace('÷','/'))) else str(round(eval(st.session_state.expression.replace('×','*').replace('÷','/')),10)); st.session_state.expression=st.session_state.display
+            except: st.session_state.display='Error'; st.session_state.expression=''
+            st.rerun()
     st.markdown('</div></div>', unsafe_allow_html=True)
 
 # 房贷
