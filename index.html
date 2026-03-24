@@ -230,16 +230,14 @@
         function addOperator(op) {
             // 如果最后是运算符，替换它
             const lastChar = fullExpression.slice(-1);
-            if (lastChar in opReverseMap) {
+            if (lastChar === '*' || lastChar === '/' || lastChar === '+' || lastChar === '-' || lastChar === '%') {
                 fullExpression = fullExpression.slice(0, -1) + op;
             } else if (fullExpression !== '' || op === '-') {
                 fullExpression += op;
             }
             // 显示友好符号
             let displayExpr = fullExpression;
-            for (let k in opMap) {
-                displayExpr = displayExpr.split(k).join(opMap[k]);
-            }
+            displayExpr = displayExpr.split('*').join('×').split('/').join('÷');
             display = displayExpr || '0';
             updateDisplay();
         }
@@ -248,10 +246,7 @@
             if (!fullExpression) return;
             try {
                 // 把显示符号转换为计算符号
-                let expr = fullExpression;
-                for (let k in opReverseMap) {
-                    expr = expr.split(k).join(opReverseMap[k]);
-                }
+                let expr = fullExpression.split('×').join('*').split('÷').join('/');
                 let result = eval(expr);
                 if (!isFinite(result) || isNaN(result)) {
                     display = 'Error';
