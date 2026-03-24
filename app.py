@@ -10,7 +10,7 @@ THEMES = {
     "🌸 樱花粉": {"bg": "#2d1f2d", "num": "#6d5d6d", "func": "#c0a0b0", "op": "#ff6b9d", "eq": "#ff6b9d"},
     "🌊 海洋蓝": {"bg": "#0d1f2d", "num": "#3d5f7d", "func": "#80a0b0", "op": "#4ecdc4", "eq": "#4ecdc4"},
     "🍋 柠檬黄": {"bg": "#1f1f1f", "num": "#5d5d4d", "func": "#c0c080", "op": "#f39c12", "eq": "#f39c12"},
-    "🖤 经典黑": {"bg": "#000000", "num": "#505050", "func": "#a0a0a0", "op": "#ff9500", "eq": "#ff9500"},
+    "🖤 经典黑": {"bg": "#000000", "num": "#333333", "func": "#a5a5a5", "op": "#ff9500", "eq": "#ff9500"},
 }
 
 # 主题选择
@@ -26,9 +26,9 @@ t_num, t_func, t_op, t_eq, t_bg = theme['num'], theme['func'], theme['op'], them
 st.markdown(f"""
 <style>
     .stApp {{ background: {t_bg}; }}
-    .wrap {{ max-width: 300px; margin: 0 auto; }}
+    .wrap {{ max-width: 320px; margin: 0 auto; }}
     .display {{ background: {t_num}; color: white; padding: 20px; font-size: 36px; text-align: right; border-radius: 15px; margin-bottom: 10px; }}
-    .card {{ background: {t_num}; border-radius: 15px; padding: 15px; margin: 10px auto; max-width: 300px; }}
+    .card {{ background: {t_num}; border-radius: 15px; padding: 15px; margin: 10px auto; max-width: 320px; }}
     .title {{ font-size: 16px; font-weight: 600; color: white; margin-bottom: 12px; }}
 </style>
 """, unsafe_allow_html=True)
@@ -40,55 +40,70 @@ for k, v in [('display','0'),('expression',''),('rates',{'CNY':1,'USD':7.2,'EUR'
 tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="t1")
 tm = {'🧮': 0, '🏠': 1, '🔄': 2, '❤️': 3}
 
-# 计算器 - 用st.expander来隐藏按钮区域避免布局问题
+# 计算器
 if tm[tab] == 0:
     st.markdown('<div class="wrap">', unsafe_allow_html=True)
     st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
     
-    # 用4列布局
-    rows = [
-        [('AC', t_func), ('±', t_func), ('%', t_func), ('÷', t_op)],
-        [('7', t_num), ('8', t_num), ('9', t_num), ('×', t_op)],
-        [('4', t_num), ('5', t_num), ('6', t_num), ('-', t_op)],
-        [('1', t_num), ('2', t_num), ('3', t_num), ('+', t_op)],
-    ]
-    
-    for row in rows:
-        cols = st.columns(4)
-        for i, (lbl, color) in enumerate(row):
-            with cols[i]:
-                if st.button(lbl, key=f"btn_{lbl}_{i}", use_container_width=True):
-                    if lbl == 'AC':
-                        st.session_state.display = '0'
-                        st.session_state.expression = ''
-                    elif lbl == '±':
-                        st.session_state.expression = '-' + st.session_state.expression
-                        st.session_state.display = st.session_state.expression
-                    elif lbl in ['÷', '×', '-', '+', '%']:
-                        st.session_state.expression += lbl
-                        st.session_state.display = st.session_state.expression
-                    else:
-                        st.session_state.expression += lbl
-                        st.session_state.display = st.session_state.expression
-                    st.rerun()
-    
-    # 最后一行
+    # 4列x5行按钮
     cols = st.columns(4)
     with cols[0]:
-        if st.button('0', key="btn_0", use_container_width=True):
-            st.session_state.expression += '0'
-            st.session_state.display = st.session_state.expression
+        if st.button("AC", key="ac1"):
+            st.session_state.display='0'; st.session_state.expression=''
             st.rerun()
     with cols[1]:
-        if st.button('.', key="btn_dot", use_container_width=True):
-            st.session_state.expression += '.'
-            st.session_state.display = st.session_state.expression
+        if st.button("±", key="pm1"):
+            if st.session_state.expression: st.session_state.expression='-'+st.session_state.expression; st.session_state.display=st.session_state.expression
+            st.rerun()
+    with cols[2]:
+        if st.button("%", key="pct1"):
+            st.session_state.expression+='%'; st.session_state.display=st.session_state.expression
             st.rerun()
     with cols[3]:
-        if st.button('=', key="btn_eq", use_container_width=True):
+        if st.button("÷", key="div1"):
+            st.session_state.expression+='÷'; st.session_state.display=st.session_state.expression
+            st.rerun()
+    
+    cols = st.columns(4)
+    with cols[0]:
+        if st.button("7", key="7_1"): st.session_state.expression+='7'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[1]:
+        if st.button("8", key="8_1"): st.session_state.expression+='8'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[2]:
+        if st.button("9", key="9_1"): st.session_state.expression+='9'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[3]:
+        if st.button("×", key="mul1"): st.session_state.expression+='×'; st.session_state.display=st.session_state.expression; st.rerun()
+    
+    cols = st.columns(4)
+    with cols[0]:
+        if st.button("4", key="4_1"): st.session_state.expression+='4'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[1]:
+        if st.button("5", key="5_1"): st.session_state.expression+='5'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[2]:
+        if st.button("6", key="6_1"): st.session_state.expression+='6'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[3]:
+        if st.button("-", key="sub1"): st.session_state.expression+='-'; st.session_state.display=st.session_state.expression; st.rerun()
+    
+    cols = st.columns(4)
+    with cols[0]:
+        if st.button("1", key="1_1"): st.session_state.expression+='1'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[1]:
+        if st.button("2", key="2_1"): st.session_state.expression+='2'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[2]:
+        if st.button("3", key="3_1"): st.session_state.expression+='3'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[3]:
+        if st.button("+", key="add1"): st.session_state.expression+='+'; st.session_state.display=st.session_state.expression; st.rerun()
+    
+    cols = st.columns(4)
+    with cols[0]:
+        if st.button("0", key="0_1"): st.session_state.expression+='0'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[1]:
+        if st.button(".", key="dot1"): st.session_state.expression+='.'; st.session_state.display=st.session_state.expression; st.rerun()
+    with cols[3]:
+        if st.button("=", key="eq1"):
             try:
-                result = eval(st.session_state.expression.replace('×', '*').replace('÷', '/'))
-                st.session_state.display = str(int(result)) if result == int(result) else str(round(result, 10))
+                result = eval(st.session_state.expression.replace('×','*').replace('÷','/'))
+                st.session_state.display = str(int(result)) if result == int(result) else str(round(result,10))
                 st.session_state.expression = st.session_state.display
             except:
                 st.session_state.display = 'Error'
