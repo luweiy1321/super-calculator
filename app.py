@@ -6,53 +6,30 @@ st.set_page_config(page_title="计算器", page_icon="🧮", layout="centered")
 
 # 主题
 THEMES = {
-    "💜 紫罗蓝": {"bg": "#1c1c1e", "num": "#2c2c2e", "func": "#636366", "op": "#a8a8b3", "eq": "#ff9f0a"},
-    "🌸 樱花粉": {"bg": "#2d1f2d", "num": "#3d2d3d", "func": "#5d4d5d", "op": "#d4a5b9", "eq": "#ff6b9d"},
-    "🌊 海洋蓝": {"bg": "#0d1f2d", "num": "#1d2f3d", "func": "#3d5a6d", "op": "#5da4b4", "eq": "#4ecdc4"},
-    "🍋 柠檬黄": {"bg": "#1f1f1f", "num": "#2d2d2d", "func": "#4d4d4d", "op": "#f7dc6f", "eq": "#f39c12"},
-    "🖤 经典黑": {"bg": "#000000", "num": "#333333", "func": "#a5a5a5", "op": "#ff9500", "eq": "#ff9500"},
+    "💜 紫罗蓝": {"bg": "#1c1c1e", "num": "#505050", "func": "#a0a0a0", "op": "#ff9f0a", "eq": "#ff9f0a"},
+    "🌸 樱花粉": {"bg": "#2d1f2d", "num": "#6d5d6d", "func": "#c0a0b0", "op": "#ff6b9d", "eq": "#ff6b9d"},
+    "🌊 海洋蓝": {"bg": "#0d1f2d", "num": "#3d5f7d", "func": "#80a0b0", "op": "#4ecdc4", "eq": "#4ecdc4"},
+    "🍋 柠檬黄": {"bg": "#1f1f1f", "num": "#5d5d4d", "func": "#c0c080", "op": "#f39c12", "eq": "#f39c12"},
+    "🖤 经典黑": {"bg": "#000000", "num": "#505050", "func": "#a0a0a0", "op": "#ff9500", "eq": "#ff9500"},
 }
 
 # 主题选择
 if 'saved_theme' not in st.session_state:
     st.session_state.saved_theme = "🖤 经典黑"
-theme_name = st.selectbox("🎨", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.saved_theme), key="tp", on_change=lambda: setattr(st.session_state, 'saved_theme', st.session_state.tp))
+theme_name = st.selectbox("🎨 主题", list(THEMES.keys()), index=list(THEMES.keys()).index(st.session_state.saved_theme), key="tp")
+if theme_name != st.session_state.saved_theme:
+    st.session_state.saved_theme = theme_name
 theme = THEMES[theme_name]
 t_num, t_func, t_op, t_eq, t_bg = theme['num'], theme['func'], theme['op'], theme['eq'], theme['bg']
 
-# CSS - 圆形按钮
+# CSS
 st.markdown(f"""
 <style>
     .stApp {{ background: {t_bg}; }}
-    .wrap {{ max-width: 320px; margin: 0 auto; padding-bottom: 50px; }}
-    .display {{ background: {t_num}; color: white; padding: 15px 20px; font-size: 40px; text-align: right; border-radius: 15px; margin-bottom: 10px; }}
-    
-    /* 圆形按钮网格 */
-    .btn-row {{ display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 8px; }}
-    .round-btn {{
-        width: 65px; height: 65px;
-        border-radius: 50% !important;
-        border: none;
-        font-size: 22px;
-        display: flex; align-items: center; justify-content: center;
-    }}
-    
-    /* 数字按钮 */
-    .btn-num {{ background: {t_num} !important; color: white !important; }}
-    /* 功能按钮 */
-    .btn-func {{ background: {t_func} !important; color: black !important; }}
-    /* 操作符 */
-    .btn-op {{ background: {t_op} !important; color: black !important; }}
-    /* 等号 */
-    .btn-eq {{ background: {t_eq} !important; color: white !important; }}
-    
-    .card {{ background: {t_num}; border-radius: 15px; padding: 15px; margin: 10px auto; max-width: 320px; }}
+    .wrap {{ max-width: 300px; margin: 0 auto; }}
+    .display {{ background: {t_num}; color: white; padding: 20px; font-size: 36px; text-align: right; border-radius: 15px; margin-bottom: 10px; }}
+    .card {{ background: {t_num}; border-radius: 15px; padding: 15px; margin: 10px auto; max-width: 300px; }}
     .title {{ font-size: 16px; font-weight: 600; color: white; margin-bottom: 12px; }}
-    
-    /* 隐藏底部图标 */
-    .streamlit-bottom {{
-        display: none !important;
-    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -63,57 +40,62 @@ for k, v in [('display','0'),('expression',''),('rates',{'CNY':1,'USD':7.2,'EUR'
 tab = st.radio("", ["🧮", "🏠", "🔄", "❤️"], horizontal=True, index=0, key="t1")
 tm = {'🧮': 0, '🏠': 1, '🔄': 2, '❤️': 3}
 
-# 计算器
+# 计算器 - 用st.expander来隐藏按钮区域避免布局问题
 if tm[tab] == 0:
     st.markdown('<div class="wrap">', unsafe_allow_html=True)
     st.markdown(f'<div class="display">{st.session_state.display}</div>', unsafe_allow_html=True)
     
-    # 行1: AC ± % ÷
-    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
-    for lbl, cls in [('AC','btn-func'),('±','btn-func'),('%','btn-func'),('÷','btn-op')]:
-        if st.button(lbl, key=f"b{lbl}", help=cls):
-            if lbl == 'AC': st.session_state.display='0'; st.session_state.expression=''
-            elif lbl == '±': st.session_state.expression='-'+st.session_state.expression; st.session_state.display=st.session_state.expression
-            else: st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    # 用4列布局
+    rows = [
+        [('AC', t_func), ('±', t_func), ('%', t_func), ('÷', t_op)],
+        [('7', t_num), ('8', t_num), ('9', t_num), ('×', t_op)],
+        [('4', t_num), ('5', t_num), ('6', t_num), ('-', t_op)],
+        [('1', t_num), ('2', t_num), ('3', t_num), ('+', t_op)],
+    ]
     
-    # 行2: 7 8 9 ×
-    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
-    for lbl, cls in [('7','btn-num'),('8','btn-num'),('9','btn-num'),('×','btn-op')]:
-        if st.button(lbl, key=f"b{lbl}"):
-            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    for row in rows:
+        cols = st.columns(4)
+        for i, (lbl, color) in enumerate(row):
+            with cols[i]:
+                if st.button(lbl, key=f"btn_{lbl}_{i}", use_container_width=True):
+                    if lbl == 'AC':
+                        st.session_state.display = '0'
+                        st.session_state.expression = ''
+                    elif lbl == '±':
+                        st.session_state.expression = '-' + st.session_state.expression
+                        st.session_state.display = st.session_state.expression
+                    elif lbl in ['÷', '×', '-', '+', '%']:
+                        st.session_state.expression += lbl
+                        st.session_state.display = st.session_state.expression
+                    else:
+                        st.session_state.expression += lbl
+                        st.session_state.display = st.session_state.expression
+                    st.rerun()
     
-    # 行3: 4 5 6 -
-    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
-    for lbl, cls in [('4','btn-num'),('5','btn-num'),('6','btn-num'),('-','btn-op')]:
-        if st.button(lbl, key=f"b{lbl}"):
-            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # 行4: 1 2 3 +
-    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
-    for lbl, cls in [('1','btn-num'),('2','btn-num'),('3','btn-num'),('+','btn-op')]:
-        if st.button(lbl, key=f"b{lbl}"):
-            st.session_state.expression+=lbl; st.session_state.display=st.session_state.expression; st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # 行5: 0 . =
-    st.markdown('<div class="btn-row">', unsafe_allow_html=True)
-    cols = st.columns([2,1,1])
+    # 最后一行
+    cols = st.columns(4)
     with cols[0]:
-        if st.button('0', key="b0", use_container_width=True):
-            st.session_state.expression+='0'; st.session_state.display=st.session_state.expression; st.rerun()
-    with cols[1]:
-        if st.button('.', key="bdot"):
-            st.session_state.expression+='.'; st.session_state.display=st.session_state.expression; st.rerun()
-    with cols[2]:
-        if st.button('=', key="beq"):
-            try: st.session_state.display=str(int(eval(st.session_state.expression.replace('×','*').replace('÷','/')))) if eval(st.session_state.expression.replace('×','*').replace('÷','/'))==int(eval(st.session_state.expression.replace('×','*').replace('÷','/'))) else str(round(eval(st.session_state.expression.replace('×','*').replace('÷','/')),10)); st.session_state.expression=st.session_state.display
-            except: st.session_state.display='Error'; st.session_state.expression=''
+        if st.button('0', key="btn_0", use_container_width=True):
+            st.session_state.expression += '0'
+            st.session_state.display = st.session_state.expression
             st.rerun()
-    st.markdown('</div></div>', unsafe_allow_html=True)
+    with cols[1]:
+        if st.button('.', key="btn_dot", use_container_width=True):
+            st.session_state.expression += '.'
+            st.session_state.display = st.session_state.expression
+            st.rerun()
+    with cols[3]:
+        if st.button('=', key="btn_eq", use_container_width=True):
+            try:
+                result = eval(st.session_state.expression.replace('×', '*').replace('÷', '/'))
+                st.session_state.display = str(int(result)) if result == int(result) else str(round(result, 10))
+                st.session_state.expression = st.session_state.display
+            except:
+                st.session_state.display = 'Error'
+                st.session_state.expression = ''
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # 房贷
 elif tm[tab] == 1:
