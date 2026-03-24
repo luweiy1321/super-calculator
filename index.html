@@ -223,26 +223,44 @@
             updateDisplay();
         }
         
+        // 运算符映射 - 用于显示
+        const opMap = {'*': '×', '/': '÷', '+': '+', '-': '-', '%': '%'};
+        const opReverseMap = {'×': '*', '÷': '/', '+': '+', '-': '-', '%': '%'};
+        
         function addOperator(op) {
-            if (fullExpression === '' && op !== '-') return;
-            if (['+', '-', '*', '/', '%'].includes(fullExpression.slice(-1))) {
+            // 如果最后是运算符，替换它
+            const lastChar = fullExpression.slice(-1);
+            if (lastChar in opReverseMap) {
                 fullExpression = fullExpression.slice(0, -1) + op;
-            } else {
+            } else if (fullExpression !== '' || op === '-') {
                 fullExpression += op;
             }
-            display = fullExpression;
+            // 显示友好符号
+            let displayExpr = fullExpression;
+            for (let k in opMap) {
+                displayExpr = displayExpr.split(k).join(opMap[k]);
+            }
+            display = displayExpr || '0';
             updateDisplay();
         }
         
         function calculate() {
             if (!fullExpression) return;
             try {
-                let expr = fullExpression.replace(/×/g, '*').replace(/÷/g, '/');
+                // 把显示符号转换为计算符号
+                let expr = fullExpression;
+                for (let k in opReverseMap) {
+                    expr = expr.split(k).join(opReverseMap[k]);
+                }
                 let result = eval(expr);
                 if (!isFinite(result) || isNaN(result)) {
                     display = 'Error';
                 } else {
+                    // 格式化结果
                     display = String(result);
+                    if (display.length > 10) {
+                        display = result.toExponential(6);
+                    }
                     fullExpression = String(result);
                     justCalculated = true;
                 }
