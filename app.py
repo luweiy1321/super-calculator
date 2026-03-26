@@ -52,199 +52,135 @@ def do_calc(a, b, op):
 def to_rad(d): return d * math.pi / 180 if st.session_state.is_deg else d
 def to_deg(r): return r * 180 / math.pi if st.session_state.is_deg else r
 
+def process_btn(key):
+    s = st.session_state
+    curr = float(s.display) if s.display else 0
+    p2 = s.is_2nd
+
+    if key == '2nd':
+        s.is_2nd = not p2
+    elif key == 'deg':
+        s.is_deg = not s.is_deg
+    elif key in ['sin','cos','tan']:
+        if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
+        elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
+        else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
+        s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
+        s.display = fmt(r)
+        s.is_2nd = False
+    elif key == 'x2':
+        s.expr = f"{curr}²"; s.display = fmt(curr * curr)
+    elif key == 'sqrt':
+        r = curr ** 0.25 if p2 else math.sqrt(curr)
+        s.expr = f"∜({curr})" if p2 else f"√({curr})"
+        s.display = fmt(r)
+    elif key == 'pow':
+        if s.operator and not s.new_num:
+            result = do_calc(s.prev_val, s.display, s.operator)
+            s.display = fmt(result); s.prev_val = result
+        else: s.prev_val = float(s.display)
+        s.operator = '^'; s.expr = f"{s.prev_val} ^"; s.new_num = True
+    elif key == 'pi': s.expr = "π"; s.display = fmt(math.pi)
+    elif key == 'e': s.expr = "e"; s.display = fmt(math.e)
+    elif key == 'fact':
+        f = 1
+        for i in range(2, min(int(curr), 170) + 1): f *= i
+        s.expr = f"{curr}!"; s.display = fmt(f)
+    elif key == 'ln':
+        r = math.exp(curr) if p2 else math.log(curr)
+        s.expr = f"e^{curr}" if p2 else f"ln({curr})"
+        s.display = fmt(r); s.is_2nd = False
+    elif key == 'log':
+        r = 10 ** curr if p2 else math.log10(curr)
+        s.expr = f"10^{curr}" if p2 else f"log({curr})"
+        s.display = fmt(r); s.is_2nd = False
+    elif key == 'exp':
+        s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
+    elif key == '%':
+        s.expr = f"{curr}%"; s.display = fmt(curr / 100)
+    elif key == 'ac':
+        s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
+    elif key == 'neg':
+        s.display = fmt(float(s.display) * -1)
+    elif key in '0123456789.':
+        num = key
+        if s.new_num or s.display == '0':
+            s.display = '0.' if num == '.' else num; s.new_num = False
+        else:
+            if num == '.' and '.' in s.display: pass
+            elif len(s.display) < 12: s.display += num
+    elif key in ['+','-','×','÷']:
+        op = key
+        if s.operator and not s.new_num:
+            result = do_calc(s.prev_val, s.display, s.operator)
+            s.display = fmt(result); s.prev_val = result
+        else: s.prev_val = float(s.display)
+        s.operator = op; s.expr = f"{s.prev_val} {op}"; s.new_num = True
+    elif key == '=':
+        if s.operator and s.prev_val is not None:
+            if s.operator == 'EXP':
+                result = s.prev_val * (10 ** float(s.display))
+                s.expr = f"{s.prev_val} × 10^{s.display}"
+            else:
+                result = do_calc(s.prev_val, s.display, s.operator)
+                s.expr = f"{s.prev_val} {s.operator} {s.display} ="
+            s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
+    st.rerun()
+
 tab = st.radio("", ["🧮 计算", "🏠 房贷", "🔄 换算", "❤️ 健康"], horizontal=True, key="t1")
 tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 
 if tm[tab] == 0:
-    # CSS
+    # HTML显示
     st.markdown(f'''
-    <style>
-        .stApp {{ background: {t['bg']}; }}
-        .calc-wrap {{ max-width: 340px; margin: 0 auto; }}
-        .display {{ background: {t['bg']}; padding: 20px; min-height: 110px; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; justify-content: flex-end; }}
-        .expr {{ font-size: 16px; color: #888; margin-bottom: 5px; text-align: right; overflow: hidden; }}
-        .result {{ font-size: 48px; color: {t['text']}; text-align: right; letter-spacing: -2px; }}
-        .buttons {{ background: {t['bg']}; padding: 8px; border-radius: 0 0 15px 15px; }}
-        .row {{ display: flex; margin-bottom: 6px; }}
-        .stButton > button {{
-            width: 100%;
-            height: 52px;
-            border: none;
-            border-radius: 50%;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin: 0 3px;
-            padding: 0;
-            transition: transform 0.1s;
-        }}
-        .stButton > button:active {{ transform: scale(0.95); }}
-        .num-btn > button {{ background: {t['btn_bg']}; color: {t['text']}; }}
-        .orange-btn > button {{ background: {t['orange']}; color: white; }}
-        .func-btn > button {{ background: {t['func']}; color: black; }}
-        .sci-btn > button {{ background: {t['sci']}; color: {t['sci_text']}; }}
-    </style>
-    <div class="calc-wrap">
-        <div class="display">
-            <div class="expr">{st.session_state.expr}</div>
-            <div class="result">{st.session_state.display}</div>
+    <div style="max-width:340px;margin:0 auto;background:{t['bg']};padding:0;border-radius:15px;">
+        <div style="padding:20px 15px 15px;background:{t['bg']};border-radius:15px 15px 0 0;">
+            <div style="font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;">{st.session_state.expr}</div>
+            <div style="font-size:48px;color:{t['text']};letter-spacing:-2px;">{st.session_state.display}</div>
         </div>
-        <div class="buttons">
+    </div>
     ''', unsafe_allow_html=True)
 
-    # 处理按钮
-    def process_btn(key):
-        s = st.session_state
-        curr = float(s.display) if s.display else 0
-        p2 = s.is_2nd
+    # 科学函数
+    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:10px 5px;background:{t['bg']};display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
+    for label, key in [('2nd','2nd'),('DEG' if st.session_state.is_deg else 'RAD','deg'),('sin','sin'),('cos','cos')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('tan','tan'),('x²','x2'),('√','sqrt'),('xʸ','pow')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('π','pi'),('e','e'),('n!','fact'),('ln','ln')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('log','log'),('EXP','exp'),('%','%'),('÷','÷')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        if key == '2nd':
-            s.is_2nd = not p2
-        elif key == 'deg':
-            s.is_deg = not s.is_deg
-        elif key in ['sin','cos','tan']:
-            if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
-            elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
-            else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
-            s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
-            s.display = fmt(r)
-            s.is_2nd = False
-        elif key == 'x2':
-            s.expr = f"{curr}²"; s.display = fmt(curr * curr)
-        elif key == 'sqrt':
-            r = curr ** 0.25 if p2 else math.sqrt(curr)
-            s.expr = f"∜({curr})" if p2 else f"√({curr})"
-            s.display = fmt(r)
-        elif key == 'pow':
-            if s.operator and not s.new_num:
-                result = do_calc(s.prev_val, s.display, s.operator)
-                s.display = fmt(result); s.prev_val = result
-            else: s.prev_val = float(s.display)
-            s.operator = '^'; s.expr = f"{s.prev_val} ^"; s.new_num = True
-        elif key == 'pi': s.expr = "π"; s.display = fmt(math.pi)
-        elif key == 'e': s.expr = "e"; s.display = fmt(math.e)
-        elif key == 'fact':
-            f = 1
-            for i in range(2, min(int(curr), 170) + 1): f *= i
-            s.expr = f"{curr}!"; s.display = fmt(f)
-        elif key == 'ln':
-            r = math.exp(curr) if p2 else math.log(curr)
-            s.expr = f"e^{curr}" if p2 else f"ln({curr})"
-            s.display = fmt(r); s.is_2nd = False
-        elif key == 'log':
-            r = 10 ** curr if p2 else math.log10(curr)
-            s.expr = f"10^{curr}" if p2 else f"log({curr})"
-            s.display = fmt(r); s.is_2nd = False
-        elif key == 'exp':
-            s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
-        elif key == '%':
-            s.expr = f"{curr}%"; s.display = fmt(curr / 100)
-        elif key == 'ac':
-            s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
-        elif key == 'neg':
-            s.display = fmt(float(s.display) * -1)
-        elif key in '0123456789.':
-            num = key
-            if s.new_num or s.display == '0':
-                s.display = '0.' if num == '.' else num; s.new_num = False
-            else:
-                if num == '.' and '.' in s.display: pass
-                elif len(s.display) < 12: s.display += num
-        elif key in ['+','-','×','÷']:
-            op = key
-            if s.operator and not s.new_num:
-                result = do_calc(s.prev_val, s.display, s.operator)
-                s.display = fmt(result); s.prev_val = result
-            else: s.prev_val = float(s.display)
-            s.operator = op; s.expr = f"{s.prev_val} {op}"; s.new_num = True
-        elif key == '=':
-            if s.operator and s.prev_val is not None:
-                if s.operator == 'EXP':
-                    result = s.prev_val * (10 ** float(s.display))
-                    s.expr = f"{s.prev_val} × 10^{s.display}"
-                else:
-                    result = do_calc(s.prev_val, s.display, s.operator)
-                    s.expr = f"{s.prev_val} {s.operator} {s.display} ="
-                s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
-        st.rerun()
-
-    # 科学函数行
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('2nd','2nd','sci-btn'),('DEG' if st.session_state.is_deg else 'RAD','deg','sci-btn'),('sin','sin','sci-btn'),('cos','cos','sci-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+    # 数字和运算
+    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:5px 5px 15px;background:{t['bg']};border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
+    for label, key in [('AC','ac'),('±','neg'),('',' '),('×','×')]:
+        if label:
             if st.button(label, key=f"btn_{key}"):
                 process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('tan','tan','sci-btn'),('x²','x2','sci-btn'),('√','sqrt','sci-btn'),('xʸ','pow','sci-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+        else:
+            st.button('', disabled=True, key=f"btn_{key}")
+    for label, key in [('7','7'),('8','8'),('9','9'),('×','×')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('4','4'),('5','5'),('6','6'),('-','-')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('1','1'),('2','2'),('3','3'),('+','+')]:
+        if st.button(label, key=f"btn_{key}"):
+            process_btn(key)
+    for label, key in [('0','0'),('.','.'),('',' '),('=','=')]:
+        if label:
             if st.button(label, key=f"btn_{key}"):
                 process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('π','pi','sci-btn'),('e','e','sci-btn'),('n!','fact','sci-btn'),('ln','ln','sci-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('log','log','sci-btn'),('EXP','exp','sci-btn'),('%','%','func-btn'),('÷','÷','orange-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    # 数字行
-    st.markdown('---', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('7','7','num-btn'),('8','8','num-btn'),('9','9','num-btn'),('×','×','orange-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('4','4','num-btn'),('5','5','num-btn'),('6','6','num-btn'),('-','-','orange-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('1','1','num-btn'),('2','2','num-btn'),('3','3','num-btn'),('+','+','orange-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('AC','ac','func-btn'),('±','neg','func-btn'),('=','=','orange-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    cols = st.columns(4)
-    for i, (label, key, cls) in enumerate([('0','0','num-btn'),('.','.','num-btn')]):
-        with cols[i]:
-            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-            if st.button(label, key=f"btn_{key}"):
-                process_btn(key)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('</div></div>', unsafe_allow_html=True)
+        else:
+            st.button('', disabled=True, key=f"btn_{key}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif tm[tab] == 1:
     st.markdown('<div style="max-width:340px;margin:0 auto;background:#2a2a2a;padding:20px;border-radius:15px;"><div style="font-size:20px;margin-bottom:15px;">🏠 房贷计算器</div></div>', unsafe_allow_html=True)
