@@ -6,12 +6,12 @@ import math
 st.set_page_config(page_title="超级计算器", page_icon="🧮", layout="centered")
 
 THEMES = {
-    "深空黑": {"bg": "#000000", "btn_bg": "#333333", "orange": "#ff9f0a", "func": "#a5a5a5", "sci": "#505050", "sci_text": "#ff9f0a", "text": "#ffffff", "display_bg": "#000000"},
-    "海洋蓝": {"bg": "#001f3f", "btn_bg": "#003366", "orange": "#0074d9", "func": "#004080", "sci": "#004080", "sci_text": "#7fdbff", "text": "#ffffff", "display_bg": "#001f3f"},
-    "极光紫": {"bg": "#1a0a2e", "btn_bg": "#2d1b4e", "orange": "#9b59b6", "func": "#3d2066", "sci": "#3d2066", "sci_text": "#d4a5ff", "text": "#ffffff", "display_bg": "#1a0a2e"},
-    "荧光绿": {"bg": "#0a1a0a", "btn_bg": "#1a3a1a", "orange": "#2ecc40", "func": "#1e4d2b", "sci": "#1e4d2b", "sci_text": "#7dff7d", "text": "#ffffff", "display_bg": "#0a1a0a"},
-    "烈焰红": {"bg": "#1a0a0a", "btn_bg": "#3a1a1a", "orange": "#e74c3c", "func": "#4a2020", "sci": "#4a2020", "sci_text": "#ff6b6b", "text": "#ffffff", "display_bg": "#1a0a0a"},
-    "香槟金": {"bg": "#1a150a", "btn_bg": "#3a3020", "orange": "#f39c12", "func": "#4a4025", "sci": "#4a4025", "sci_text": "#ffd700", "text": "#ffffff", "display_bg": "#1a150a"},
+    "深空黑": {"bg": "#000000", "btn_bg": "#333333", "orange": "#ff9f0a", "func": "#a5a5a5", "sci": "#505050", "sci_text": "#ff9f0a", "text": "#ffffff"},
+    "海洋蓝": {"bg": "#001f3f", "btn_bg": "#003366", "orange": "#0074d9", "func": "#004080", "sci": "#004080", "sci_text": "#7fdbff", "text": "#ffffff"},
+    "极光紫": {"bg": "#1a0a2e", "btn_bg": "#2d1b4e", "orange": "#9b59b6", "func": "#3d2066", "sci": "#3d2066", "sci_text": "#d4a5ff", "text": "#ffffff"},
+    "荧光绿": {"bg": "#0a1a0a", "btn_bg": "#1a3a1a", "orange": "#2ecc40", "func": "#1e4d2b", "sci": "#1e4d2b", "sci_text": "#7dff7d", "text": "#ffffff"},
+    "烈焰红": {"bg": "#1a0a0a", "btn_bg": "#3a1a1a", "orange": "#e74c3c", "func": "#4a2020", "sci": "#4a2020", "sci_text": "#ff6b6b", "text": "#ffffff"},
+    "香槟金": {"bg": "#1a150a", "btn_bg": "#3a3020", "orange": "#f39c12", "func": "#4a4025", "sci": "#4a4025", "sci_text": "#ffd700", "text": "#ffffff"},
 }
 
 defaults = {
@@ -52,185 +52,199 @@ def do_calc(a, b, op):
 def to_rad(d): return d * math.pi / 180 if st.session_state.is_deg else d
 def to_deg(r): return r * 180 / math.pi if st.session_state.is_deg else r
 
-# 按钮样式
-def btn(text, key, cls="num"):
-    colors = {
-        "num": f"background:{t['btn_bg']};color:{t['text']};",
-        "orange": f"background:{t['orange']};color:#fff;",
-        "func": f"background:{t['func']};color:#000;",
-        "sci": f"background:{t['sci']};color:{t['sci_text']};",
-    }
-    return f'''<button onclick="handleBtn('{key}')" style="
-        flex:1;height:52px;border:none;border-radius:50%;
-        font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;
-        {colors.get(cls, colors['num'])}">{text}</button>'''
-
 tab = st.radio("", ["🧮 计算", "🏠 房贷", "🔄 换算", "❤️ 健康"], horizontal=True, key="t1")
 tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 
 if tm[tab] == 0:
-    # JS处理
-    st.markdown('''<script>
-    function handleBtn(key) {
-        window.parent.postMessage({type: 'calc_btn', key: key}, '*');
-    }
-    window.addEventListener('message', function(e) {
-        if (e.data.type === 'update_display') {
-            document.getElementById('calc_result').textContent = e.data.result;
-            document.getElementById('calc_expr').textContent = e.data.expr || '';
-        }
-    });
-    </script>''', unsafe_allow_html=True)
-
-    # HTML布局
+    # CSS
     st.markdown(f'''
     <style>
         .stApp {{ background: {t['bg']}; }}
-        .wrap {{ max-width: 340px; margin: 0 auto; }}
-        .display {{ background: {t['display_bg']}; padding: 20px; min-height: 110px; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; justify-content: flex-end; }}
-        .expr {{ font-size: 16px; color: #888; margin-bottom: 5px; text-align: right; }}
+        .calc-wrap {{ max-width: 340px; margin: 0 auto; }}
+        .display {{ background: {t['bg']}; padding: 20px; min-height: 110px; border-radius: 15px 15px 0 0; display: flex; flex-direction: column; justify-content: flex-end; }}
+        .expr {{ font-size: 16px; color: #888; margin-bottom: 5px; text-align: right; overflow: hidden; }}
         .result {{ font-size: 48px; color: {t['text']}; text-align: right; letter-spacing: -2px; }}
-        .buttons {{ background: {t['display_bg']}; padding: 8px; border-radius: 0 0 15px 15px; }}
-        .row {{ display: flex; margin-bottom: 6px; justify-content: center; }}
+        .buttons {{ background: {t['bg']}; padding: 8px; border-radius: 0 0 15px 15px; }}
+        .row {{ display: flex; margin-bottom: 6px; }}
+        .stButton > button {{
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 3px;
+            padding: 0;
+            transition: transform 0.1s;
+        }}
+        .stButton > button:active {{ transform: scale(0.95); }}
+        .num-btn > button {{ background: {t['btn_bg']}; color: {t['text']}; }}
+        .orange-btn > button {{ background: {t['orange']}; color: white; }}
+        .func-btn > button {{ background: {t['func']}; color: black; }}
+        .sci-btn > button {{ background: {t['sci']}; color: {t['sci_text']}; }}
     </style>
-    <div class="wrap">
+    <div class="calc-wrap">
         <div class="display">
-            <div class="expr" id="calc_expr">{st.session_state.expr}</div>
-            <div class="result" id="calc_result">{st.session_state.display}</div>
+            <div class="expr">{st.session_state.expr}</div>
+            <div class="result">{st.session_state.display}</div>
         </div>
         <div class="buttons">
-            <div class="row">
-                <button onclick="handleBtn('2nd')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">2nd</button>
-                <button onclick="handleBtn('deg')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">{'DEG' if st.session_state.is_deg else 'RAD'}</button>
-                <button onclick="handleBtn('sin')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">sin</button>
-                <button onclick="handleBtn('cos')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">cos</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('tan')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">tan</button>
-                <button onclick="handleBtn('x2')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">x²</button>
-                <button onclick="handleBtn('sqrt')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">√</button>
-                <button onclick="handleBtn('pow')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">xʸ</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('pi')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">π</button>
-                <button onclick="handleBtn('e')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">e</button>
-                <button onclick="handleBtn('fact')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">n!</button>
-                <button onclick="handleBtn('ln')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">ln</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('log')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">log</button>
-                <button onclick="handleBtn('exp')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:14px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['sci']};color:{t['sci_text']};">EXP</button>
-                <button onclick="handleBtn('%')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['func']};color:#000;">%</button>
-                <button onclick="handleBtn('/')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['orange']};color:#fff;">÷</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('7')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">7</button>
-                <button onclick="handleBtn('8')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">8</button>
-                <button onclick="handleBtn('9')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">9</button>
-                <button onclick="handleBtn('*')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['orange']};color:#fff;">×</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('4')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">4</button>
-                <button onclick="handleBtn('5')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">5</button>
-                <button onclick="handleBtn('6')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">6</button>
-                <button onclick="handleBtn('-')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['orange']};color:#fff;">-</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('1')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">1</button>
-                <button onclick="handleBtn('2')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">2</button>
-                <button onclick="handleBtn('3')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">3</button>
-                <button onclick="handleBtn('+')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['orange']};color:#fff;">+</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('ac')" style="flex:2;height:52px;border:none;border-radius:26px;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['func']};color:#000;">AC</button>
-                <button onclick="handleBtn('neg')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:16px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['func']};color:#000;">±</button>
-                <button onclick="handleBtn('=')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['orange']};color:#fff;">=</button>
-            </div>
-            <div class="row">
-                <button onclick="handleBtn('0')" style="flex:2;height:52px;border:none;border-radius:26px;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">0</button>
-                <button onclick="handleBtn('.')" style="flex:1;height:52px;border:none;border-radius:50%;font-size:18px;font-weight:500;cursor:pointer;margin:0 3px;background:{t['btn_bg']};color:{t['text']};">.</button>
-            </div>
-        </div>
-    </div>
     ''', unsafe_allow_html=True)
 
-    # 隐藏的Streamlit按钮用于状态更新
-    btn_keys = ['2nd','deg','sin','cos','tan','x2','sqrt','pow','pi','e','fact','ln','log','exp','%','/','7','8','9','*','4','5','6','-','1','2','3','+','ac','neg','=','0','.']
-    for key in btn_keys:
-        if st.button(key, key=f"btn_{key}", hidden=True):
-            s = st.session_state
-            curr = float(s.display) if s.display else 0
-            p2 = s.is_2nd
+    # 处理按钮
+    def process_btn(key):
+        s = st.session_state
+        curr = float(s.display) if s.display else 0
+        p2 = s.is_2nd
 
-            if key == '2nd':
-                s.is_2nd = not p2
-            elif key == 'deg':
-                s.is_deg = not s.is_deg
-            elif key in ['sin','cos','tan']:
-                if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
-                elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
-                else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
-                s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
-                s.display = fmt(r)
-                s.is_2nd = False
-            elif key == 'x2':
-                s.expr = f"{curr}²"; s.display = fmt(curr * curr)
-            elif key == 'sqrt':
-                r = curr ** 0.25 if p2 else math.sqrt(curr)
-                s.expr = f"∜({curr})" if p2 else f"√({curr})"
-                s.display = fmt(r)
-            elif key == 'pow':
-                if s.operator and not s.new_num:
-                    result = do_calc(s.prev_val, s.display, s.operator)
-                    s.display = fmt(result); s.prev_val = result
-                else: s.prev_val = float(s.display)
-                s.operator = '^'; s.expr = f"{s.prev_val} ^"; s.new_num = True
-            elif key == 'pi': s.expr = "π"; s.display = fmt(math.pi)
-            elif key == 'e': s.expr = "e"; s.display = fmt(math.e)
-            elif key == 'fact':
-                f = 1
-                for i in range(2, min(int(curr), 170) + 1): f *= i
-                s.expr = f"{curr}!"; s.display = fmt(f)
-            elif key == 'ln':
-                r = math.exp(curr) if p2 else math.log(curr)
-                s.expr = f"e^{curr}" if p2 else f"ln({curr})"
-                s.display = fmt(r); s.is_2nd = False
-            elif key == 'log':
-                r = 10 ** curr if p2 else math.log10(curr)
-                s.expr = f"10^{curr}" if p2 else f"log({curr})"
-                s.display = fmt(r); s.is_2nd = False
-            elif key == 'exp':
-                s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
-            elif key == '%':
-                s.expr = f"{curr}%"; s.display = fmt(curr / 100)
-            elif key == 'ac':
-                s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
-            elif key == 'neg':
-                s.display = fmt(float(s.display) * -1)
-            elif key in '0123456789.':
-                num = key
-                if s.new_num or s.display == '0':
-                    s.display = '0.' if num == '.' else num; s.new_num = False
+        if key == '2nd':
+            s.is_2nd = not p2
+        elif key == 'deg':
+            s.is_deg = not s.is_deg
+        elif key in ['sin','cos','tan']:
+            if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
+            elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
+            else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
+            s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
+            s.display = fmt(r)
+            s.is_2nd = False
+        elif key == 'x2':
+            s.expr = f"{curr}²"; s.display = fmt(curr * curr)
+        elif key == 'sqrt':
+            r = curr ** 0.25 if p2 else math.sqrt(curr)
+            s.expr = f"∜({curr})" if p2 else f"√({curr})"
+            s.display = fmt(r)
+        elif key == 'pow':
+            if s.operator and not s.new_num:
+                result = do_calc(s.prev_val, s.display, s.operator)
+                s.display = fmt(result); s.prev_val = result
+            else: s.prev_val = float(s.display)
+            s.operator = '^'; s.expr = f"{s.prev_val} ^"; s.new_num = True
+        elif key == 'pi': s.expr = "π"; s.display = fmt(math.pi)
+        elif key == 'e': s.expr = "e"; s.display = fmt(math.e)
+        elif key == 'fact':
+            f = 1
+            for i in range(2, min(int(curr), 170) + 1): f *= i
+            s.expr = f"{curr}!"; s.display = fmt(f)
+        elif key == 'ln':
+            r = math.exp(curr) if p2 else math.log(curr)
+            s.expr = f"e^{curr}" if p2 else f"ln({curr})"
+            s.display = fmt(r); s.is_2nd = False
+        elif key == 'log':
+            r = 10 ** curr if p2 else math.log10(curr)
+            s.expr = f"10^{curr}" if p2 else f"log({curr})"
+            s.display = fmt(r); s.is_2nd = False
+        elif key == 'exp':
+            s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
+        elif key == '%':
+            s.expr = f"{curr}%"; s.display = fmt(curr / 100)
+        elif key == 'ac':
+            s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
+        elif key == 'neg':
+            s.display = fmt(float(s.display) * -1)
+        elif key in '0123456789.':
+            num = key
+            if s.new_num or s.display == '0':
+                s.display = '0.' if num == '.' else num; s.new_num = False
+            else:
+                if num == '.' and '.' in s.display: pass
+                elif len(s.display) < 12: s.display += num
+        elif key in ['+','-','×','÷']:
+            op = key
+            if s.operator and not s.new_num:
+                result = do_calc(s.prev_val, s.display, s.operator)
+                s.display = fmt(result); s.prev_val = result
+            else: s.prev_val = float(s.display)
+            s.operator = op; s.expr = f"{s.prev_val} {op}"; s.new_num = True
+        elif key == '=':
+            if s.operator and s.prev_val is not None:
+                if s.operator == 'EXP':
+                    result = s.prev_val * (10 ** float(s.display))
+                    s.expr = f"{s.prev_val} × 10^{s.display}"
                 else:
-                    if num == '.' and '.' in s.display: pass
-                    elif len(s.display) < 12: s.display += num
-            elif key in ['+','-','*','/']:
-                op = key
-                if s.operator and not s.new_num:
                     result = do_calc(s.prev_val, s.display, s.operator)
-                    s.display = fmt(result); s.prev_val = result
-                else: s.prev_val = float(s.display)
-                s.operator = op.replace('*','×').replace('/','÷'); s.expr = f"{s.prev_val} {s.operator}"; s.new_num = True
-            elif key == '=':
-                if s.operator and s.prev_val is not None:
-                    if s.operator == 'EXP':
-                        result = s.prev_val * (10 ** float(s.display))
-                        s.expr = f"{s.prev_val} × 10^{s.display}"
-                    else:
-                        result = do_calc(s.prev_val, s.display, s.operator)
-                        s.expr = f"{s.prev_val} {s.operator} {s.display} ="
-                    s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
-            st.rerun()
+                    s.expr = f"{s.prev_val} {s.operator} {s.display} ="
+                s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
+        st.rerun()
+
+    # 科学函数行
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('2nd','2nd','sci-btn'),('DEG' if st.session_state.is_deg else 'RAD','deg','sci-btn'),('sin','sin','sci-btn'),('cos','cos','sci-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('tan','tan','sci-btn'),('x²','x2','sci-btn'),('√','sqrt','sci-btn'),('xʸ','pow','sci-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('π','pi','sci-btn'),('e','e','sci-btn'),('n!','fact','sci-btn'),('ln','ln','sci-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('log','log','sci-btn'),('EXP','exp','sci-btn'),('%','%','func-btn'),('÷','÷','orange-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    # 数字行
+    st.markdown('---', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('7','7','num-btn'),('8','8','num-btn'),('9','9','num-btn'),('×','×','orange-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('4','4','num-btn'),('5','5','num-btn'),('6','6','num-btn'),('-','-','orange-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('1','1','num-btn'),('2','2','num-btn'),('3','3','num-btn'),('+','+','orange-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('AC','ac','func-btn'),('±','neg','func-btn'),('=','=','orange-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    cols = st.columns(4)
+    for i, (label, key, cls) in enumerate([('0','0','num-btn'),('.','.','num-btn')]):
+        with cols[i]:
+            st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"btn_{key}"):
+                process_btn(key)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
 elif tm[tab] == 1:
     st.markdown('<div style="max-width:340px;margin:0 auto;background:#2a2a2a;padding:20px;border-radius:15px;"><div style="font-size:20px;margin-bottom:15px;">🏠 房贷计算器</div></div>', unsafe_allow_html=True)
