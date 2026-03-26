@@ -133,16 +133,16 @@ tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 if tm[tab] == 0:
     # HTML显示
     st.markdown(f'''
-    <div style="max-width:340px;margin:0 auto;background:{t['bg']};padding:0;border-radius:15px;">
-        <div style="padding:20px 15px 15px;background:{t['bg']};border-radius:15px 15px 0 0;">
+    <div style="max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;">
+        <div style="padding:20px 15px 15px;background:{t["bg"]};border-radius:15px 15px 0 0;">
             <div style="font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;">{st.session_state.expr}</div>
-            <div style="font-size:48px;color:{t['text']};letter-spacing:-2px;">{st.session_state.display}</div>
+            <div style="font-size:48px;color:{t["text"]};letter-spacing:-2px;">{st.session_state.display}</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
 
     # 科学函数
-    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:10px 5px;background:{t['bg']};display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
+    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:10px 5px;background:{t["bg"]};display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
     for label, key in [('2nd','2nd'),('DEG' if st.session_state.is_deg else 'RAD','deg'),('sin','sin'),('cos','cos')]:
         if st.button(label, key=f"btn_{key}"):
             process_btn(key)
@@ -158,7 +158,7 @@ if tm[tab] == 0:
     st.markdown('</div>', unsafe_allow_html=True)
 
     # 数字和运算
-    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:5px 5px 15px;background:{t['bg']};border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
+    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:5px 5px 15px;background:{t["bg"]};border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
     for label, key in [('AC','ac'),('±','neg'),('',' '),('×','×')]:
         if label:
             if st.button(label, key=f"btn_{key}"):
