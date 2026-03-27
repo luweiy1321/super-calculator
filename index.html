@@ -87,9 +87,10 @@
         }
         .theme-btn.active { opacity: 1; border: 2px solid #fff; }
         .divider {
+            grid-column: span 4;
             height: 1px;
             background: rgba(255,159,10,0.2);
-            margin: 5px 10px;
+            margin: 5px 0;
         }
         @media (max-width: 350px) {
             .btn { height: 48px; font-size: 20px; }
@@ -175,17 +176,17 @@
                 renderButtons();
             } else if (key === 'sin') {
                 const r = is2nd ? toDeg(Math.asin(curr)) : Math.sin(toRad(curr));
-                expression = `sin⁻¹(${curr})` if is2nd : `sin(${curr})`;
+                expression = is2nd ? `sin⁻¹(${curr})` : `sin(${curr})`;
                 display = fmt(r);
                 is2nd = false;
             } else if (key === 'cos') {
                 const r = is2nd ? toDeg(Math.acos(curr)) : Math.cos(toRad(curr));
-                expression = `cos⁻¹(${curr})` if is2rd : `cos(${curr})`;
+                expression = is2nd ? `cos⁻¹(${curr})` : `cos(${curr})`;
                 display = fmt(r);
                 is2nd = false;
             } else if (key === 'tan') {
                 const r = is2nd ? toDeg(Math.atan(curr)) : Math.tan(toRad(curr));
-                expression = `tan⁻¹(${curr})` if is2nd : `tan(${curr})`;
+                expression = is2nd ? `tan⁻¹(${curr})` : `tan(${curr})`;
                 display = fmt(r);
                 is2nd = false;
             } else if (key === 'x2') {
@@ -312,7 +313,9 @@
             });
 
             // 分割线
-            btns.appendChild(document.createElement('div')).className = 'divider';
+            const divider = document.createElement('div');
+            divider.className = 'divider';
+            btns.appendChild(divider);
 
             // 基础运算
             const basicRow1 = [
