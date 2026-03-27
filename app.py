@@ -28,48 +28,23 @@ with st.sidebar:
     theme_name = st.selectbox("选择", list(THEMES.keys()), index=0, key="ts")
     t = THEMES[theme_name]
 
-def fmt(n):
-    try:
-        n = float(n)
-        if math.isnan(n): return 'Error'
-        if math.isinf(n): return '∞' if n > 0 else '-∞'
-        if abs(n) > 1e12: return f'{n:.2e}'
-        if n == int(n): return str(int(n))
-        return f'{n:.10g}'
-    except: return 'Error'
-
-def do_calc(a, b, op):
-    try:
-        a, b = float(a), float(b)
-        if op == '+': return a + b
-        elif op == '-': return a - b
-        elif op == '×': return a * b
-        elif op == '÷': return 0 if b == 0 else a / b
-        elif op == '^': return a ** b
-        return b
-    except: return 'Error'
-
-def to_rad(d): return d * math.pi / 180 if st.session_state.is_deg else d
-def to_deg(r): return r * 180 / math.pi if st.session_state.is_deg else r
-
-def process_btn(key):
+# 处理URL中的按钮参数
+params = st.query_params
+if 'btn' in params:
+    key = params['btn']
     s = st.session_state
     curr = float(s.display) if s.display else 0
     p2 = s.is_2nd
 
-    if key == '2nd':
-        s.is_2nd = not p2
-    elif key == 'deg':
-        s.is_deg = not s.is_deg
+    if key == '2nd': s.is_2nd = not p2
+    elif key == 'deg': s.is_deg = not s.is_deg
     elif key in ['sin','cos','tan']:
         if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
         elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
         else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
         s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
-        s.display = fmt(r)
-        s.is_2nd = False
-    elif key == 'x2':
-        s.expr = f"{curr}²"; s.display = fmt(curr * curr)
+        s.display = fmt(r); s.is_2nd = False
+    elif key == 'x2': s.expr = f"{curr}²"; s.display = fmt(curr * curr)
     elif key == 'sqrt':
         r = curr ** 0.25 if p2 else math.sqrt(curr)
         s.expr = f"∜({curr})" if p2 else f"√({curr})"
@@ -94,38 +69,53 @@ def process_btn(key):
         r = 10 ** curr if p2 else math.log10(curr)
         s.expr = f"10^{curr}" if p2 else f"log({curr})"
         s.display = fmt(r); s.is_2nd = False
-    elif key == 'exp':
-        s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
-    elif key == '%':
-        s.expr = f"{curr}%"; s.display = fmt(curr / 100)
-    elif key == 'ac':
-        s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
-    elif key == 'neg':
-        s.display = fmt(float(s.display) * -1)
+    elif key == 'exp': s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
+    elif key == '%': s.expr = f"{curr}%"; s.display = fmt(curr / 100)
+    elif key == 'ac': s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
+    elif key == 'neg': s.display = fmt(float(s.display) * -1)
     elif key in '0123456789.':
-        num = key
         if s.new_num or s.display == '0':
-            s.display = '0.' if num == '.' else num; s.new_num = False
+            s.display = '0.' if key == '.' else key; s.new_num = False
         else:
-            if num == '.' and '.' in s.display: pass
-            elif len(s.display) < 12: s.display += num
-    elif key in ['+','-','×','÷','mul','div']:
-        op = key.replace('mul','×').replace('div','÷')
+            if key == '.' and '.' in s.display: pass
+            elif len(s.display) < 12: s.display += key
+    elif key in ['+','-','×','÷']:
         if s.operator and not s.new_num:
             result = do_calc(s.prev_val, s.display, s.operator)
             s.display = fmt(result); s.prev_val = result
         else: s.prev_val = float(s.display)
-        s.operator = op; s.expr = f"{s.prev_val} {op}"; s.new_num = True
-    elif key in ['=','eq']:
+        s.operator = key; s.expr = f"{s.prev_val} {key}"; s.new_num = True
+    elif key in ['=', 'eq']:
         if s.operator and s.prev_val is not None:
-            if s.operator == 'EXP':
-                result = s.prev_val * (10 ** float(s.display))
-                s.expr = f"{s.prev_val} × 10^{s.display}"
-            else:
-                result = do_calc(s.prev_val, s.display, s.operator)
-                s.expr = f"{s.prev_val} {s.operator} {s.display} ="
+            if s.operator == 'EXP': result = s.prev_val * (10 ** float(s.display)); s.expr = f"{s.prev_val} × 10^{s.display}"
+            else: result = do_calc(s.prev_val, s.display, s.operator); s.expr = f"{s.prev_val} {s.operator} {s.display} ="
             s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
+    st.query_params.clear()
     st.rerun()
+
+def fmt(n):
+    try:
+        n = float(n)
+        if math.isnan(n): return 'Error'
+        if math.isinf(n): return '∞' if n > 0 else '-∞'
+        if abs(n) > 1e12: return f'{n:.2e}'
+        if n == int(n): return str(int(n))
+        return f'{n:.10g}'
+    except: return 'Error'
+
+def do_calc(a, b, op):
+    try:
+        a, b = float(a), float(b)
+        if op == '+': return a + b
+        elif op == '-': return a - b
+        elif op == '×': return a * b
+        elif op == '÷': return 0 if b == 0 else a / b
+        elif op == '^': return a ** b
+        return b
+    except: return 'Error'
+
+def to_rad(d): return d * math.pi / 180 if st.session_state.is_deg else d
+def to_deg(r): return r * 180 / math.pi if st.session_state.is_deg else r
 
 tab = st.radio("", ["🧮 计算", "🏠 房贷", "🔄 换算", "❤️ 健康"], horizontal=True, key="t1")
 tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
@@ -133,73 +123,81 @@ tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 if tm[tab] == 0:
     # 显示区域
     st.markdown(f'''
-    <div style="max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;">
-        <div style="padding:20px 15px 15px;background:{t["bg"]};border-radius:15px 15px 0 0;">
-            <div style="font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;">{st.session_state.expr}</div>
-            <div style="font-size:48px;color:{t["text"]};letter-spacing:-2px;">{st.session_state.display}</div>
+    <style>
+    .calc-container{{max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;overflow:hidden;}}
+    .display{{padding:20px 15px 15px;}}
+    .expr{{font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;}}
+    .num{{font-size:48px;color:{t["text"]};letter-spacing:-2px;}}
+    .btn-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:5px;}}
+    .btn-grid-5{{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:5px;}}
+    .calc-btn{{height:52px;border-radius:26px;border:none;font-size:22px;font-weight:400;
+               cursor:pointer;transition:all 0.1s;display:flex;align-items:center;justify-content:center;
+               color:#fff;background:{t["btn_bg"]};}}
+    .calc-btn:active{{transform:scale(0.95);}}
+    .btn-orange{{background:{t["orange"]};}}
+    .btn-func{{background:{t["func"]};color:#000;}}
+    .btn-sci{{background:{t["sci"]};color:{t["sci_text"]};font-size:18px;}}
+    .btn-wide{{grid-column:span 2;}}
+    .divider{{height:1px;background:{t["sci_text"]}33;margin:5px 10px;}}
+    </style>
+    <div class="calc-container">
+        <div class="display">
+            <div class="expr">{st.session_state.expr}</div>
+            <div class="num">{st.session_state.display}</div>
+        </div>
+        <div class="btn-grid-5">
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=2nd'">2nd</button>
+            <button class="calc-btn btn-func" onclick="window.location.href='?btn=deg'">{'DEG' if st.session_state.is_deg else 'RAD'}</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=sin'">sin</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=cos'">cos</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=tan'">tan</button>
+        </div>
+        <div class="btn-grid-5">
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=x2'">x²</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=sqrt'">√</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=pow'">xʸ</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=pi'">π</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=e'">e</button>
+        </div>
+        <div class="btn-grid-5">
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=fact'">n!</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=ln'">ln</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=log'">log</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=exp'">EXP</button>
+            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=%'">%</button>
+        </div>
+        <div class="divider"></div>
+        <div class="btn-grid">
+            <button class="calc-btn btn-func" onclick="window.location.href='?btn=ac'">AC</button>
+            <button class="calc-btn btn-func" onclick="window.location.href='?btn=neg'">±</button>
+            <button class="calc-btn btn-func" onclick="window.location.href='?btn=%'">%</button>
+            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=÷'">÷</button>
+        </div>
+        <div class="btn-grid">
+            <button class="calc-btn" onclick="window.location.href='?btn=7'">7</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=8'">8</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=9'">9</button>
+            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=×'">×</button>
+        </div>
+        <div class="btn-grid">
+            <button class="calc-btn" onclick="window.location.href='?btn=4'">4</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=5'">5</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=6'">6</button>
+            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=-'">-</button>
+        </div>
+        <div class="btn-grid">
+            <button class="calc-btn" onclick="window.location.href='?btn=1'">1</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=2'">2</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=3'">3</button>
+            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=+'">+</button>
+        </div>
+        <div class="btn-grid">
+            <button class="calc-btn btn-wide" onclick="window.location.href='?btn=0'">0</button>
+            <button class="calc-btn" onclick="window.location.href='?btn=.'">.</button>
+            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=eq'">=</button>
         </div>
     </div>
     ''', unsafe_allow_html=True)
-
-    # 科学函数 - 4列布局
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('2nd', key='sci_2nd'): process_btn('2nd')
-    if c2.button('DEG' if st.session_state.is_deg else 'RAD', key='sci_deg'): process_btn('deg')
-    if c3.button('sin', key='sci_sin'): process_btn('sin')
-    if c4.button('cos', key='sci_cos'): process_btn('cos')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('tan', key='sci_tan'): process_btn('tan')
-    if c2.button('x²', key='sci_x2'): process_btn('x2')
-    if c3.button('√', key='sci_sqrt'): process_btn('sqrt')
-    if c4.button('xʸ', key='sci_pow'): process_btn('pow')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('π', key='sci_pi'): process_btn('pi')
-    if c2.button('e', key='sci_e'): process_btn('e')
-    if c3.button('n!', key='sci_fact'): process_btn('fact')
-    if c4.button('ln', key='sci_ln'): process_btn('ln')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('log', key='sci_log'): process_btn('log')
-    if c2.button('EXP', key='sci_exp'): process_btn('exp')
-    if c3.button('%', key='sci_pct'): process_btn('%')
-    if c4.button('÷', key='sci_div'): process_btn('div')
-
-    # 分割线
-    st.markdown(f'<div style="max-width:340px;margin:5px auto;height:1px;background:{t["sci_text"]}22;"></div>', unsafe_allow_html=True)
-
-    # 基础运算 - 4列布局
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('AC', key='op_ac'): process_btn('ac')
-    if c2.button('±', key='op_neg'): process_btn('neg')
-    c3.button('', disabled=True, key='op_sp1')
-    if c4.button('×', key='op_mul'): process_btn('mul')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('7', key='op_7'): process_btn('7')
-    if c2.button('8', key='op_8'): process_btn('8')
-    if c3.button('9', key='op_9'): process_btn('9')
-    if c4.button('÷', key='op_div'): process_btn('div')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('4', key='op_4'): process_btn('4')
-    if c2.button('5', key='op_5'): process_btn('5')
-    if c3.button('6', key='op_6'): process_btn('6')
-    if c4.button('-', key='op_sub'): process_btn('-')
-
-    c1,c2,c3,c4 = st.columns(4)
-    if c1.button('1', key='op_1'): process_btn('1')
-    if c2.button('2', key='op_2'): process_btn('2')
-    if c3.button('3', key='op_3'): process_btn('3')
-    if c4.button('+', key='op_add'): process_btn('+')
-
-    # 0键双宽
-    c1,c2,c3,c4 = st.columns([2,1,1,1])
-    if c1.button('0', key='op_0'): process_btn('0')
-    if c2.button('.', key='op_dot'): process_btn('.')
-    c3.button('', disabled=True, key='op_sp2')
-    if c4.button('=', key='op_eq'): process_btn('eq')
 
 elif tm[tab] == 1:
     st.markdown('<div style="max-width:340px;margin:0 auto;background:#2a2a2a;padding:20px;border-radius:15px;"><div style="font-size:20px;margin-bottom:15px;">🏠 房贷计算器</div></div>', unsafe_allow_html=True)
