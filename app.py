@@ -109,14 +109,14 @@ def process_btn(key):
         else:
             if num == '.' and '.' in s.display: pass
             elif len(s.display) < 12: s.display += num
-    elif key in ['+','-','×','÷']:
-        op = key
+    elif key in ['+','-','×','÷','mul','div']:
+        op = key.replace('mul','×').replace('div','÷')
         if s.operator and not s.new_num:
             result = do_calc(s.prev_val, s.display, s.operator)
             s.display = fmt(result); s.prev_val = result
         else: s.prev_val = float(s.display)
         s.operator = op; s.expr = f"{s.prev_val} {op}"; s.new_num = True
-    elif key == '=':
+    elif key in ['=','eq']:
         if s.operator and s.prev_val is not None:
             if s.operator == 'EXP':
                 result = s.prev_val * (10 ** float(s.display))
@@ -144,42 +144,42 @@ if tm[tab] == 0:
     # 科学函数
     st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:10px 5px;background:{t["bg"]};display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
     for label, key in [('2nd','2nd'),('DEG' if st.session_state.is_deg else 'RAD','deg'),('sin','sin'),('cos','cos')]:
-        if st.button(label, key=f"btn_{key}"):
+        if st.button(label, key=f"sci_{key}"):
             process_btn(key)
     for label, key in [('tan','tan'),('x²','x2'),('√','sqrt'),('xʸ','pow')]:
-        if st.button(label, key=f"btn_{key}"):
+        if st.button(label, key=f"sci_{key}"):
             process_btn(key)
     for label, key in [('π','pi'),('e','e'),('n!','fact'),('ln','ln')]:
-        if st.button(label, key=f"btn_{key}"):
+        if st.button(label, key=f"sci_{key}"):
             process_btn(key)
-    for label, key in [('log','log'),('EXP','exp'),('%','%'),('÷','÷')]:
-        if st.button(label, key=f"btn_{key}"):
+    for label, key in [('log','log'),('EXP','exp'),('%','%'),('÷','div')]:
+        if st.button(label, key=f"sci_{key}"):
             process_btn(key)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # 数字和运算
     st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:5px 5px 15px;background:{t["bg"]};border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
-    for label, key in [('AC','ac'),('±','neg'),('',' '),('×','×')]:
+    for label, key in [('AC','ac'),('±','neg'),('','sp1'),('×','mul')]:
         if label:
-            if st.button(label, key=f"btn_{key}"):
+            if st.button(label, key=f"op_{key}"):
                 process_btn(key)
         else:
-            st.button('', disabled=True, key=f"btn_{key}")
-    for label, key in [('7','7'),('8','8'),('9','9'),('÷','÷')]:
-        if st.button(label, key=f"btn_{key}"):
+            st.button('', disabled=True, key=f"op_{key}")
+    for label, key in [('7','7'),('8','8'),('9','9'),('÷','div')]:
+        if st.button(label, key=f"op_{key}"):
             process_btn(key)
     for label, key in [('4','4'),('5','5'),('6','6'),('-','-')]:
-        if st.button(label, key=f"btn_{key}"):
+        if st.button(label, key=f"op_{key}"):
             process_btn(key)
     for label, key in [('1','1'),('2','2'),('3','3'),('+','+')]:
-        if st.button(label, key=f"btn_{key}"):
+        if st.button(label, key=f"op_{key}"):
             process_btn(key)
-    for label, key in [('0','0'),('.','.'),('',' '),('=','=')]:
+    for label, key in [('0','0'),('.','.'),('','sp2'),('=','eq')]:
         if label:
-            if st.button(label, key=f"btn_{key}"):
+            if st.button(label, key=f"op_{key}"):
                 process_btn(key)
         else:
-            st.button('', disabled=True, key=f"btn_{key}")
+            st.button('', disabled=True, key=f"op_{key}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif tm[tab] == 1:
