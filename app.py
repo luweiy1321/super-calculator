@@ -131,7 +131,7 @@ tab = st.radio("", ["🧮 计算", "🏠 房贷", "🔄 换算", "❤️ 健康"
 tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 
 if tm[tab] == 0:
-    # HTML显示
+    # 显示区域
     st.markdown(f'''
     <div style="max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;">
         <div style="padding:20px 15px 15px;background:{t["bg"]};border-radius:15px 15px 0 0;">
@@ -141,46 +141,65 @@ if tm[tab] == 0:
     </div>
     ''', unsafe_allow_html=True)
 
-    # 科学函数
-    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:10px 5px;background:{t["bg"]};display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
-    for label, key in [('2nd','2nd'),('DEG' if st.session_state.is_deg else 'RAD','deg'),('sin','sin'),('cos','cos')]:
-        if st.button(label, key=f"sci_{key}"):
-            process_btn(key)
-    for label, key in [('tan','tan'),('x²','x2'),('√','sqrt'),('xʸ','pow')]:
-        if st.button(label, key=f"sci_{key}"):
-            process_btn(key)
-    for label, key in [('π','pi'),('e','e'),('n!','fact'),('ln','ln')]:
-        if st.button(label, key=f"sci_{key}"):
-            process_btn(key)
-    for label, key in [('log','log'),('EXP','exp'),('%','%'),('÷','div')]:
-        if st.button(label, key=f"sci_{key}"):
-            process_btn(key)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # 科学函数 - 4列布局
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('2nd', key='sci_2nd'): process_btn('2nd')
+    if c2.button('DEG' if st.session_state.is_deg else 'RAD', key='sci_deg'): process_btn('deg')
+    if c3.button('sin', key='sci_sin'): process_btn('sin')
+    if c4.button('cos', key='sci_cos'): process_btn('cos')
 
-    # 数字和运算
-    st.markdown(f'<div style="max-width:340px;margin:0 auto;padding:5px 5px 15px;background:{t["bg"]};border-radius:0 0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">', unsafe_allow_html=True)
-    for label, key in [('AC','ac'),('±','neg'),('','sp1'),('×','mul')]:
-        if label:
-            if st.button(label, key=f"op_{key}"):
-                process_btn(key)
-        else:
-            st.button('', disabled=True, key=f"op_{key}")
-    for label, key in [('7','7'),('8','8'),('9','9'),('÷','div')]:
-        if st.button(label, key=f"op_{key}"):
-            process_btn(key)
-    for label, key in [('4','4'),('5','5'),('6','6'),('-','-')]:
-        if st.button(label, key=f"op_{key}"):
-            process_btn(key)
-    for label, key in [('1','1'),('2','2'),('3','3'),('+','+')]:
-        if st.button(label, key=f"op_{key}"):
-            process_btn(key)
-    for label, key in [('0','0'),('.','.'),('','sp2'),('=','eq')]:
-        if label:
-            if st.button(label, key=f"op_{key}"):
-                process_btn(key)
-        else:
-            st.button('', disabled=True, key=f"op_{key}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('tan', key='sci_tan'): process_btn('tan')
+    if c2.button('x²', key='sci_x2'): process_btn('x2')
+    if c3.button('√', key='sci_sqrt'): process_btn('sqrt')
+    if c4.button('xʸ', key='sci_pow'): process_btn('pow')
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('π', key='sci_pi'): process_btn('pi')
+    if c2.button('e', key='sci_e'): process_btn('e')
+    if c3.button('n!', key='sci_fact'): process_btn('fact')
+    if c4.button('ln', key='sci_ln'): process_btn('ln')
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('log', key='sci_log'): process_btn('log')
+    if c2.button('EXP', key='sci_exp'): process_btn('exp')
+    if c3.button('%', key='sci_pct'): process_btn('%')
+    if c4.button('÷', key='sci_div'): process_btn('div')
+
+    # 分割线
+    st.markdown(f'<div style="max-width:340px;margin:5px auto;height:1px;background:{t["sci_text"]}22;"></div>', unsafe_allow_html=True)
+
+    # 基础运算 - 4列布局
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('AC', key='op_ac'): process_btn('ac')
+    if c2.button('±', key='op_neg'): process_btn('neg')
+    c3.button('', disabled=True, key='op_sp1')
+    if c4.button('×', key='op_mul'): process_btn('mul')
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('7', key='op_7'): process_btn('7')
+    if c2.button('8', key='op_8'): process_btn('8')
+    if c3.button('9', key='op_9'): process_btn('9')
+    if c4.button('÷', key='op_div'): process_btn('div')
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('4', key='op_4'): process_btn('4')
+    if c2.button('5', key='op_5'): process_btn('5')
+    if c3.button('6', key='op_6'): process_btn('6')
+    if c4.button('-', key='op_sub'): process_btn('-')
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('1', key='op_1'): process_btn('1')
+    if c2.button('2', key='op_2'): process_btn('2')
+    if c3.button('3', key='op_3'): process_btn('3')
+    if c4.button('+', key='op_add'): process_btn('+')
+
+    # 0键双宽
+    c1,c2,c3,c4 = st.columns([2,1,1,1])
+    if c1.button('0', key='op_0'): process_btn('0')
+    if c2.button('.', key='op_dot'): process_btn('.')
+    c3.button('', disabled=True, key='op_sp2')
+    if c4.button('=', key='op_eq'): process_btn('eq')
 
 elif tm[tab] == 1:
     st.markdown('<div style="max-width:340px;margin:0 auto;background:#2a2a2a;padding:20px;border-radius:15px;"><div style="font-size:20px;margin-bottom:15px;">🏠 房贷计算器</div></div>', unsafe_allow_html=True)
