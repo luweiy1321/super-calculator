@@ -68,9 +68,9 @@ if tm[tab] == 0:
 
     # 科学函数 - 使用st.columns
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('2nd'): st.session_state.is_2nd = not st.session_state.is_2nd; st.rerun()
-    if c2.button('DEG' if st.session_state.is_deg else 'RAD'): st.session_state.is_deg = not st.session_state.is_deg; st.rerun()
-    if c3.button('sin'):
+    if c1.button('2nd', key='sci_2nd'): st.session_state.is_2nd = not st.session_state.is_2nd; st.rerun()
+    if c2.button('DEG' if st.session_state.is_deg else 'RAD', key='sci_deg'): st.session_state.is_deg = not st.session_state.is_deg; st.rerun()
+    if c3.button('sin', key='sci_sin'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         if p2: r = to_deg(math.asin(curr))
@@ -79,7 +79,7 @@ if tm[tab] == 0:
         st.session_state.display = fmt(r)
         st.session_state.is_2nd = False
         st.rerun()
-    if c4.button('cos'):
+    if c4.button('cos', key='sci_cos'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         if p2: r = to_deg(math.acos(curr))
@@ -90,7 +90,7 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('tan'):
+    if c1.button('tan', key='sci_tan'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         if p2: r = to_deg(math.atan(curr))
@@ -99,19 +99,19 @@ if tm[tab] == 0:
         st.session_state.display = fmt(r)
         st.session_state.is_2nd = False
         st.rerun()
-    if c2.button('x²'):
+    if c2.button('x²', key='sci_x2'):
         curr = float(st.session_state.display)
         st.session_state.expr = f"{curr}²"
         st.session_state.display = fmt(curr * curr)
         st.rerun()
-    if c3.button('√'):
+    if c3.button('√', key='sci_sqrt'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         r = curr ** 0.25 if p2 else math.sqrt(curr)
         st.session_state.expr = f"∜({curr})" if p2 else f"√({curr})"
         st.session_state.display = fmt(r)
         st.rerun()
-    if c4.button('xʸ'):
+    if c4.button('xʸ', key='sci_pow'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -125,22 +125,22 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('π'):
+    if c1.button('π', key='sci_pi'):
         st.session_state.expr = "π"
         st.session_state.display = fmt(math.pi)
         st.rerun()
-    if c2.button('e'):
+    if c2.button('e', key='sci_e'):
         st.session_state.expr = "e"
         st.session_state.display = fmt(math.e)
         st.rerun()
-    if c3.button('n!'):
+    if c3.button('n!', key='sci_fact'):
         curr = float(st.session_state.display)
         f = 1
         for i in range(2, min(int(curr), 170) + 1): f *= i
         st.session_state.expr = f"{curr}!"
         st.session_state.display = fmt(f)
         st.rerun()
-    if c4.button('ln'):
+    if c4.button('ln', key='sci_ln'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         r = math.exp(curr) if p2 else math.log(curr)
@@ -150,7 +150,7 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('log'):
+    if c1.button('log', key='sci_log'):
         curr = float(st.session_state.display)
         p2 = st.session_state.is_2nd
         r = 10 ** curr if p2 else math.log10(curr)
@@ -158,19 +158,19 @@ if tm[tab] == 0:
         st.session_state.display = fmt(r)
         st.session_state.is_2nd = False
         st.rerun()
-    if c2.button('EXP'):
+    if c2.button('EXP', key='sci_exp'):
         curr = float(st.session_state.display)
         st.session_state.prev_val = curr
         st.session_state.operator = 'EXP'
         st.session_state.expr = f"{curr} × 10^"
         st.session_state.new_num = True
         st.rerun()
-    if c3.button('%'):
+    if c3.button('%', key='sci_pct'):
         curr = float(st.session_state.display)
         st.session_state.expr = f"{curr}%"
         st.session_state.display = fmt(curr / 100)
         st.rerun()
-    if c4.button('÷'):
+    if c4.button('÷', key='sci_div'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -188,18 +188,18 @@ if tm[tab] == 0:
 
     # 基础运算
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('AC'):
+    if c1.button('AC', key='op_ac'):
         st.session_state.display = '0'
         st.session_state.expr = ''
         st.session_state.prev_val = None
         st.session_state.operator = None
         st.session_state.new_num = True
         st.rerun()
-    if c2.button('±'):
+    if c2.button('±', key='op_neg'):
         st.session_state.display = fmt(float(st.session_state.display) * -1)
         st.rerun()
-    c3.button('', disabled=True)
-    if c4.button('×'):
+    c3.button('', disabled=True, key='op_sp1')
+    if c4.button('×', key='op_mul'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -213,28 +213,28 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('7'):
+    if c1.button('7', key='op_7'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '7'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '7'
         st.rerun()
-    if c2.button('8'):
+    if c2.button('8', key='op_8'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '8'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '8'
         st.rerun()
-    if c3.button('9'):
+    if c3.button('9', key='op_9'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '9'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '9'
         st.rerun()
-    if c4.button('÷'):
+    if c4.button('÷', key='op_div'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -248,28 +248,28 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('4'):
+    if c1.button('4', key='op_4'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '4'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '4'
         st.rerun()
-    if c2.button('5'):
+    if c2.button('5', key='op_5'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '5'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '5'
         st.rerun()
-    if c3.button('6'):
+    if c3.button('6', key='op_6'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '6'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '6'
         st.rerun()
-    if c4.button('-'):
+    if c4.button('-', key='op_sub'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -283,28 +283,28 @@ if tm[tab] == 0:
         st.rerun()
 
     c1,c2,c3,c4 = st.columns(4)
-    if c1.button('1'):
+    if c1.button('1', key='op_1'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '1'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '1'
         st.rerun()
-    if c2.button('2'):
+    if c2.button('2', key='op_2'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '2'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '2'
         st.rerun()
-    if c3.button('3'):
+    if c3.button('3', key='op_3'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '3'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '3'
         st.rerun()
-    if c4.button('+'):
+    if c4.button('+', key='op_add'):
         curr = float(st.session_state.display)
         if st.session_state.operator and not st.session_state.new_num:
             result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
@@ -319,22 +319,22 @@ if tm[tab] == 0:
 
     # 0键双宽
     c1,c2,c3,c4 = st.columns([2,1,1,1])
-    if c1.button('0'):
+    if c1.button('0', key='op_0'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '0'
             st.session_state.new_num = False
         elif len(st.session_state.display) < 12:
             st.session_state.display += '0'
         st.rerun()
-    if c2.button('.'):
+    if c2.button('.', key='op_dot'):
         if st.session_state.new_num or st.session_state.display == '0':
             st.session_state.display = '0.'
             st.session_state.new_num = False
         elif '.' not in st.session_state.display:
             st.session_state.display += '.'
         st.rerun()
-    c3.button('', disabled=True)
-    if c4.button('='):
+    c3.button('', disabled=True, key='op_sp2')
+    if c4.button('=', key='op_eq'):
         if st.session_state.operator and st.session_state.prev_val is not None:
             curr = float(st.session_state.display)
             if st.session_state.operator == 'EXP':
