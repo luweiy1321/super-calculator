@@ -165,7 +165,7 @@ if tm[tab] == 0:
                 process_btn(key)
         else:
             st.button('', disabled=True, key=f"btn_{key}")
-    for label, key in [('7','7'),('8','8'),('9','9'),('×','×')]:
+    for label, key in [('7','7'),('8','8'),('9','9'),('÷','÷')]:
         if st.button(label, key=f"btn_{key}"):
             process_btn(key)
     for label, key in [('4','4'),('5','5'),('6','6'),('-','-')]:
