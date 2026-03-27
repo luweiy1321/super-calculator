@@ -28,71 +28,6 @@ with st.sidebar:
     theme_name = st.selectbox("选择", list(THEMES.keys()), index=0, key="ts")
     t = THEMES[theme_name]
 
-# 处理URL中的按钮参数
-params = st.query_params
-if 'btn' in params:
-    key = params['btn']
-    s = st.session_state
-    curr = float(s.display) if s.display else 0
-    p2 = s.is_2nd
-
-    if key == '2nd': s.is_2nd = not p2
-    elif key == 'deg': s.is_deg = not s.is_deg
-    elif key in ['sin','cos','tan']:
-        if key == 'sin': r = to_deg(math.asin(curr)) if p2 else math.sin(to_rad(curr))
-        elif key == 'cos': r = to_deg(math.acos(curr)) if p2 else math.cos(to_rad(curr))
-        else: r = to_deg(math.atan(curr)) if p2 else math.tan(to_rad(curr))
-        s.expr = f"{key}⁻¹({curr})" if p2 else f"{key}({curr})"
-        s.display = fmt(r); s.is_2nd = False
-    elif key == 'x2': s.expr = f"{curr}²"; s.display = fmt(curr * curr)
-    elif key == 'sqrt':
-        r = curr ** 0.25 if p2 else math.sqrt(curr)
-        s.expr = f"∜({curr})" if p2 else f"√({curr})"
-        s.display = fmt(r)
-    elif key == 'pow':
-        if s.operator and not s.new_num:
-            result = do_calc(s.prev_val, s.display, s.operator)
-            s.display = fmt(result); s.prev_val = result
-        else: s.prev_val = float(s.display)
-        s.operator = '^'; s.expr = f"{s.prev_val} ^"; s.new_num = True
-    elif key == 'pi': s.expr = "π"; s.display = fmt(math.pi)
-    elif key == 'e': s.expr = "e"; s.display = fmt(math.e)
-    elif key == 'fact':
-        f = 1
-        for i in range(2, min(int(curr), 170) + 1): f *= i
-        s.expr = f"{curr}!"; s.display = fmt(f)
-    elif key == 'ln':
-        r = math.exp(curr) if p2 else math.log(curr)
-        s.expr = f"e^{curr}" if p2 else f"ln({curr})"
-        s.display = fmt(r); s.is_2nd = False
-    elif key == 'log':
-        r = 10 ** curr if p2 else math.log10(curr)
-        s.expr = f"10^{curr}" if p2 else f"log({curr})"
-        s.display = fmt(r); s.is_2nd = False
-    elif key == 'exp': s.prev_val = curr; s.operator = 'EXP'; s.expr = f"{curr} × 10^"; s.new_num = True
-    elif key == '%': s.expr = f"{curr}%"; s.display = fmt(curr / 100)
-    elif key == 'ac': s.display = '0'; s.expr = ''; s.prev_val = None; s.operator = None; s.new_num = True
-    elif key == 'neg': s.display = fmt(float(s.display) * -1)
-    elif key in '0123456789.':
-        if s.new_num or s.display == '0':
-            s.display = '0.' if key == '.' else key; s.new_num = False
-        else:
-            if key == '.' and '.' in s.display: pass
-            elif len(s.display) < 12: s.display += key
-    elif key in ['+','-','×','÷']:
-        if s.operator and not s.new_num:
-            result = do_calc(s.prev_val, s.display, s.operator)
-            s.display = fmt(result); s.prev_val = result
-        else: s.prev_val = float(s.display)
-        s.operator = key; s.expr = f"{s.prev_val} {key}"; s.new_num = True
-    elif key in ['=', 'eq']:
-        if s.operator and s.prev_val is not None:
-            if s.operator == 'EXP': result = s.prev_val * (10 ** float(s.display)); s.expr = f"{s.prev_val} × 10^{s.display}"
-            else: result = do_calc(s.prev_val, s.display, s.operator); s.expr = f"{s.prev_val} {s.operator} {s.display} ="
-            s.display = fmt(result); s.prev_val = None; s.operator = None; s.new_num = True
-    st.query_params.clear()
-    st.rerun()
-
 def fmt(n):
     try:
         n = float(n)
@@ -123,81 +58,296 @@ tm = {'🧮 计算': 0, '🏠 房贷': 1, '🔄 换算': 2, '❤️ 健康': 3}
 if tm[tab] == 0:
     # 显示区域
     st.markdown(f'''
-    <style>
-    .calc-container{{max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;overflow:hidden;}}
-    .display{{padding:20px 15px 15px;}}
-    .expr{{font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;}}
-    .num{{font-size:48px;color:{t["text"]};letter-spacing:-2px;}}
-    .btn-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:5px;}}
-    .btn-grid-5{{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:5px;}}
-    .calc-btn{{height:52px;border-radius:26px;border:none;font-size:22px;font-weight:400;
-               cursor:pointer;transition:all 0.1s;display:flex;align-items:center;justify-content:center;
-               color:#fff;background:{t["btn_bg"]};}}
-    .calc-btn:active{{transform:scale(0.95);}}
-    .btn-orange{{background:{t["orange"]};}}
-    .btn-func{{background:{t["func"]};color:#000;}}
-    .btn-sci{{background:{t["sci"]};color:{t["sci_text"]};font-size:18px;}}
-    .btn-wide{{grid-column:span 2;}}
-    .divider{{height:1px;background:{t["sci_text"]}33;margin:5px 10px;}}
-    </style>
-    <div class="calc-container">
-        <div class="display">
-            <div class="expr">{st.session_state.expr}</div>
-            <div class="num">{st.session_state.display}</div>
-        </div>
-        <div class="btn-grid-5">
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=2nd'">2nd</button>
-            <button class="calc-btn btn-func" onclick="window.location.href='?btn=deg'">{'DEG' if st.session_state.is_deg else 'RAD'}</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=sin'">sin</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=cos'">cos</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=tan'">tan</button>
-        </div>
-        <div class="btn-grid-5">
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=x2'">x²</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=sqrt'">√</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=pow'">xʸ</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=pi'">π</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=e'">e</button>
-        </div>
-        <div class="btn-grid-5">
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=fact'">n!</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=ln'">ln</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=log'">log</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=exp'">EXP</button>
-            <button class="calc-btn btn-sci" onclick="window.location.href='?btn=%'">%</button>
-        </div>
-        <div class="divider"></div>
-        <div class="btn-grid">
-            <button class="calc-btn btn-func" onclick="window.location.href='?btn=ac'">AC</button>
-            <button class="calc-btn btn-func" onclick="window.location.href='?btn=neg'">±</button>
-            <button class="calc-btn btn-func" onclick="window.location.href='?btn=%'">%</button>
-            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=÷'">÷</button>
-        </div>
-        <div class="btn-grid">
-            <button class="calc-btn" onclick="window.location.href='?btn=7'">7</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=8'">8</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=9'">9</button>
-            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=×'">×</button>
-        </div>
-        <div class="btn-grid">
-            <button class="calc-btn" onclick="window.location.href='?btn=4'">4</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=5'">5</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=6'">6</button>
-            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=-'">-</button>
-        </div>
-        <div class="btn-grid">
-            <button class="calc-btn" onclick="window.location.href='?btn=1'">1</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=2'">2</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=3'">3</button>
-            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=+'">+</button>
-        </div>
-        <div class="btn-grid">
-            <button class="calc-btn btn-wide" onclick="window.location.href='?btn=0'">0</button>
-            <button class="calc-btn" onclick="window.location.href='?btn=.'">.</button>
-            <button class="calc-btn btn-orange" onclick="window.location.href='?btn=eq'">=</button>
+    <div style="max-width:340px;margin:0 auto;background:{t["bg"]};padding:0;border-radius:15px;">
+        <div style="padding:20px 15px 15px;">
+            <div style="font-size:16px;color:#888;margin-bottom:5px;height:20px;overflow:hidden;">{st.session_state.expr}</div>
+            <div style="font-size:48px;color:{t["text"]};letter-spacing:-2px;">{st.session_state.display}</div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
+
+    # 科学函数 - 使用st.columns
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('2nd'): st.session_state.is_2nd = not st.session_state.is_2nd; st.rerun()
+    if c2.button('DEG' if st.session_state.is_deg else 'RAD'): st.session_state.is_deg = not st.session_state.is_deg; st.rerun()
+    if c3.button('sin'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        if p2: r = to_deg(math.asin(curr))
+        else: r = math.sin(to_rad(curr))
+        st.session_state.expr = f"sin⁻¹({curr})" if p2 else f"sin({curr})"
+        st.session_state.display = fmt(r)
+        st.session_state.is_2nd = False
+        st.rerun()
+    if c4.button('cos'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        if p2: r = to_deg(math.acos(curr))
+        else: r = math.cos(to_rad(curr))
+        st.session_state.expr = f"cos⁻¹({curr})" if p2 else f"cos({curr})"
+        st.session_state.display = fmt(r)
+        st.session_state.is_2nd = False
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('tan'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        if p2: r = to_deg(math.atan(curr))
+        else: r = math.tan(to_rad(curr))
+        st.session_state.expr = f"tan⁻¹({curr})" if p2 else f"tan({curr})"
+        st.session_state.display = fmt(r)
+        st.session_state.is_2nd = False
+        st.rerun()
+    if c2.button('x²'):
+        curr = float(st.session_state.display)
+        st.session_state.expr = f"{curr}²"
+        st.session_state.display = fmt(curr * curr)
+        st.rerun()
+    if c3.button('√'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        r = curr ** 0.25 if p2 else math.sqrt(curr)
+        st.session_state.expr = f"∜({curr})" if p2 else f"√({curr})"
+        st.session_state.display = fmt(r)
+        st.rerun()
+    if c4.button('xʸ'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = float(st.session_state.display)
+        st.session_state.operator = '^'
+        st.session_state.expr = f"{st.session_state.prev_val} ^"
+        st.session_state.new_num = True
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('π'):
+        st.session_state.expr = "π"
+        st.session_state.display = fmt(math.pi)
+        st.rerun()
+    if c2.button('e'):
+        st.session_state.expr = "e"
+        st.session_state.display = fmt(math.e)
+        st.rerun()
+    if c3.button('n!'):
+        curr = float(st.session_state.display)
+        f = 1
+        for i in range(2, min(int(curr), 170) + 1): f *= i
+        st.session_state.expr = f"{curr}!"
+        st.session_state.display = fmt(f)
+        st.rerun()
+    if c4.button('ln'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        r = math.exp(curr) if p2 else math.log(curr)
+        st.session_state.expr = f"e^{curr}" if p2 else f"ln({curr})"
+        st.session_state.display = fmt(r)
+        st.session_state.is_2nd = False
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('log'):
+        curr = float(st.session_state.display)
+        p2 = st.session_state.is_2nd
+        r = 10 ** curr if p2 else math.log10(curr)
+        st.session_state.expr = f"10^{curr}" if p2 else f"log({curr})"
+        st.session_state.display = fmt(r)
+        st.session_state.is_2nd = False
+        st.rerun()
+    if c2.button('EXP'):
+        curr = float(st.session_state.display)
+        st.session_state.prev_val = curr
+        st.session_state.operator = 'EXP'
+        st.session_state.expr = f"{curr} × 10^"
+        st.session_state.new_num = True
+        st.rerun()
+    if c3.button('%'):
+        curr = float(st.session_state.display)
+        st.session_state.expr = f"{curr}%"
+        st.session_state.display = fmt(curr / 100)
+        st.rerun()
+    if c4.button('÷'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = curr
+        st.session_state.operator = '÷'
+        st.session_state.expr = f"{st.session_state.prev_val} ÷"
+        st.session_state.new_num = True
+        st.rerun()
+
+    # 分割线
+    st.markdown(f'<div style="max-width:340px;margin:5px auto;height:1px;background:{t["sci_text"]}33;"></div>', unsafe_allow_html=True)
+
+    # 基础运算
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('AC'):
+        st.session_state.display = '0'
+        st.session_state.expr = ''
+        st.session_state.prev_val = None
+        st.session_state.operator = None
+        st.session_state.new_num = True
+        st.rerun()
+    if c2.button('±'):
+        st.session_state.display = fmt(float(st.session_state.display) * -1)
+        st.rerun()
+    c3.button('', disabled=True)
+    if c4.button('×'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = curr
+        st.session_state.operator = '×'
+        st.session_state.expr = f"{st.session_state.prev_val} ×"
+        st.session_state.new_num = True
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('7'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '7'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '7'
+        st.rerun()
+    if c2.button('8'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '8'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '8'
+        st.rerun()
+    if c3.button('9'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '9'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '9'
+        st.rerun()
+    if c4.button('÷'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = curr
+        st.session_state.operator = '÷'
+        st.session_state.expr = f"{st.session_state.prev_val} ÷"
+        st.session_state.new_num = True
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('4'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '4'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '4'
+        st.rerun()
+    if c2.button('5'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '5'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '5'
+        st.rerun()
+    if c3.button('6'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '6'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '6'
+        st.rerun()
+    if c4.button('-'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = curr
+        st.session_state.operator = '-'
+        st.session_state.expr = f"{st.session_state.prev_val} -"
+        st.session_state.new_num = True
+        st.rerun()
+
+    c1,c2,c3,c4 = st.columns(4)
+    if c1.button('1'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '1'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '1'
+        st.rerun()
+    if c2.button('2'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '2'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '2'
+        st.rerun()
+    if c3.button('3'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '3'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '3'
+        st.rerun()
+    if c4.button('+'):
+        curr = float(st.session_state.display)
+        if st.session_state.operator and not st.session_state.new_num:
+            result = do_calc(st.session_state.prev_val, st.session_state.display, st.session_state.operator)
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = result
+        else:
+            st.session_state.prev_val = curr
+        st.session_state.operator = '+'
+        st.session_state.expr = f"{st.session_state.prev_val} +"
+        st.session_state.new_num = True
+        st.rerun()
+
+    # 0键双宽
+    c1,c2,c3,c4 = st.columns([2,1,1,1])
+    if c1.button('0'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '0'
+            st.session_state.new_num = False
+        elif len(st.session_state.display) < 12:
+            st.session_state.display += '0'
+        st.rerun()
+    if c2.button('.'):
+        if st.session_state.new_num or st.session_state.display == '0':
+            st.session_state.display = '0.'
+            st.session_state.new_num = False
+        elif '.' not in st.session_state.display:
+            st.session_state.display += '.'
+        st.rerun()
+    c3.button('', disabled=True)
+    if c4.button('='):
+        if st.session_state.operator and st.session_state.prev_val is not None:
+            curr = float(st.session_state.display)
+            if st.session_state.operator == 'EXP':
+                result = st.session_state.prev_val * (10 ** curr)
+                st.session_state.expr = f"{st.session_state.prev_val} × 10^{curr}"
+            else:
+                result = do_calc(st.session_state.prev_val, curr, st.session_state.operator)
+                st.session_state.expr = f"{st.session_state.prev_val} {st.session_state.operator} {curr} ="
+            st.session_state.display = fmt(result)
+            st.session_state.prev_val = None
+            st.session_state.operator = None
+            st.session_state.new_num = True
+        st.rerun()
 
 elif tm[tab] == 1:
     st.markdown('<div style="max-width:340px;margin:0 auto;background:#2a2a2a;padding:20px;border-radius:15px;"><div style="font-size:20px;margin-bottom:15px;">🏠 房贷计算器</div></div>', unsafe_allow_html=True)
