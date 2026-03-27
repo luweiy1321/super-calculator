@@ -1,195 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>超级计算器</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a1a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:20px}
-.tab{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
-.tab button{padding:10px 15px;background:#333;border:none;border-radius:20px;color:#fff;white-space:nowrap}
-.tab button.active{background:#007AFF}
-.calc{max-width:400px;margin:0 auto}
-.display{background:#000;padding:20px;font-size:48px;text-align:right;border-radius:15px 15px 0 0;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
-.display .expr{font-size:18px;color:#888;margin-bottom:5px;min-height:22px}
-.display .result{letter-spacing:-2px}
-.hidden{display:none}
-.theme-bar{display:flex;align-items:center;padding:8px 10px;background:#2a2a2a;gap:6px;flex-wrap:wrap}
-.theme-label{font-size:11px;color:#888}
-.theme-btn{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;color:#fff;opacity:0.5;border:none;cursor:pointer}
-.theme-btn.active{opacity:1;border:2px solid #fff}
-.theme-btn.dark{background:#333}
-.theme-btn.blue{background:#0074d9}
-.theme-btn.purple{background:#9b59b6}
-.theme-btn.green{background:#27ae60}
-.theme-btn.red{background:#e74c3c}
-.theme-btn.gold{background:#f39c12}
-.buttons{background:#000;padding:8px;border-radius:0 0 15px 15px}
-.btn-row{display:flex;margin-bottom:4px;justify-content:center}
-.btn-row:last-child{margin-bottom:0}
-.btn{padding:0;flex:1;height:52px;font-size:15px;font-weight:500;border:none;border-radius:50%;color:#fff;background:#333;margin:0 3px;cursor:pointer;transition:transform 0.1s;display:flex;align-items:center;justify-content:center}
-.btn:active{transform:scale(0.92)}
-.btn.orange{background:#ff9f0a;color:#fff}
-.btn.func{background:#a5a5a5;color:#000}
-.btn.sci{background:#505050;color:#ff9f0a}
-.btn.wide{flex:2;margin:0 3px}
-.loan-content,.unit-content,.health-content{background:#2a2a2a;padding:15px;border-radius:0 0 15px 15px}
-.loan-content input,.unit-content input,.health-content input,select{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px;font-size:16px}
-.loan-content button,.unit-content button,.health-content button{width:100%;padding:15px;background:#007AFF;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:10px;cursor:pointer}
-.result-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:15px}
-.result-box{background:#3a3a3a;padding:12px;border-radius:10px;text-align:center}
-.result-box .label{font-size:12px;color:#888}
-.result-box .value{font-size:16px;color:#007AFF}
-.result-box .value.orange{color:#ff9500}
-.result-box .value.green{color:#34c759}
-.unit-row{display:flex;gap:5px}
-.unit-row input{flex:1}
-.unit-row select{flex:1}
-.health-result{background:#3a3a3a;padding:20px;border-radius:10px;text-align:center}
-.bmi-value{font-size:48px;font-weight:bold;color:#34c759}
-.bmi-text{font-size:18px;color:#34c759}
-.health-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
-.health-stat{background:#444;padding:12px;border-radius:10px}
-.health-stat .label{font-size:12px;color:#888}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>超级计算器</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .calculator {
+            width: 100%;
+            max-width: 340px;
+        }
+        .display {
+            text-align: right;
+            padding: 20px 15px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .expression {
+            font-size: 16px;
+            color: #888;
+            height: 20px;
+            overflow: hidden;
+        }
+        .result {
+            font-size: 48px;
+            font-weight: 300;
+            color: #fff;
+            letter-spacing: -2px;
+            word-break: break-all;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            padding: 5px;
+        }
+        .btn {
+            height: 52px;
+            border-radius: 26px;
+            border: none;
+            font-size: 22px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #333;
+            color: #fff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .btn-orange { background: #ff9f0a; color: #fff; }
+        .btn-gray { background: #a5a5a5; color: #000; }
+        .btn-dark { background: #505050; color: #fff; }
+        .btn-wide { grid-column: span 2; }
+        .row { display: contents; }
+        .theme-bar {
+            display: flex;
+            gap: 5px;
+            padding: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .theme-btn {
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: none;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s;
+        }
+        .theme-btn.active { opacity: 1; border: 2px solid #fff; }
+        .divider {
+            height: 1px;
+            background: rgba(255,159,10,0.2);
+            margin: 5px 10px;
+        }
+        @media (max-width: 350px) {
+            .btn { height: 48px; font-size: 20px; }
+            .result { font-size: 42px; }
+        }
+    </style>
 </head>
 <body>
-<div class="tab">
-<button class="active" onclick="showTab('calc')">🧮 计算</button>
-<button onclick="showTab('loan')">🏠 房贷</button>
-<button onclick="showTab('unit')">🔄 换算</button>
-<button onclick="showTab('health')">❤️ 健康</button>
-</div>
-<div id="calc" class="calc">
-  <div class="theme-bar">
-    <span class="theme-label">配色</span>
-    <button class="theme-btn dark active" onclick="setTheme('dark',this)">深空黑</button>
-    <button class="theme-btn blue" onclick="setTheme('blue',this)">海洋蓝</button>
-    <button class="theme-btn purple" onclick="setTheme('purple',this)">极光紫</button>
-    <button class="theme-btn green" onclick="setTheme('green',this)">荧光绿</button>
-    <button class="theme-btn red" onclick="setTheme('red',this)">烈焰红</button>
-    <button class="theme-btn gold" onclick="setTheme('gold',this)">香槟金</button>
-  </div>
-  <div class="display">
-    <div class="expr" id="calcExpr"></div>
-    <div class="result" id="calcResult">0</div>
-  </div>
-  <div class="buttons">
-    <div class="btn-row">
-      <button class="btn sci" onclick="sciFunc('2nd')">2nd</button>
-      <button class="btn sci" onclick="sciFunc('sin')">sin</button>
-      <button class="btn sci" onclick="sciFunc('cos')">cos</button>
-      <button class="btn sci" onclick="sciFunc('tan')">tan</button>
+    <div class="calculator">
+        <div class="theme-bar" id="themeBar"></div>
+        <div class="display">
+            <div class="expression" id="expression"></div>
+            <div class="result" id="display">0</div>
+        </div>
+        <div class="buttons" id="buttons"></div>
     </div>
-    <div class="btn-row">
-      <button class="btn sci" onclick="sciFunc('x2')">x²</button>
-      <button class="btn sci" onclick="sciFunc('sqrt')">√</button>
-      <button class="btn sci" onclick="sciFunc('pow')">xʸ</button>
-      <button class="btn sci" onclick="sciFunc('(')">(</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn sci" onclick="sciFunc('pi')">π</button>
-      <button class="btn sci" onclick="sciFunc('e')">e</button>
-      <button class="btn sci" onclick="sciFunc('fact')">n!</button>
-      <button class="btn sci" onclick="sciFunc(')')">)</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn sci" onclick="sciFunc('ln')">ln</button>
-      <button class="btn sci" onclick="sciFunc('log')">log</button>
-      <button class="btn sci" onclick="sciFunc('exp')">EXP</button>
-      <button class="btn func" onclick="sciFunc('%')">%</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn func" onclick="clearAll()">AC</button>
-      <button class="btn func" onclick="negate()">±</button>
-      <button class="btn orange" onclick="appendOp('÷')">÷</button>
-      <button class="btn orange" onclick="appendOp('×')">×</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn" onclick="appendNum('7')">7</button>
-      <button class="btn" onclick="appendNum('8')">8</button>
-      <button class="btn" onclick="appendNum('9')">9</button>
-      <button class="btn orange" onclick="appendOp('-')">-</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn" onclick="appendNum('4')">4</button>
-      <button class="btn" onclick="appendNum('5')">5</button>
-      <button class="btn" onclick="appendNum('6')">6</button>
-      <button class="btn orange" onclick="appendOp('+')">+</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn" onclick="appendNum('1')">1</button>
-      <button class="btn" onclick="appendNum('2')">2</button>
-      <button class="btn" onclick="appendNum('3')">3</button>
-      <button class="btn orange" onclick="calculate()">=</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn wide" onclick="appendNum('0')">0</button>
-      <button class="btn" onclick="appendNum('.')">.</button>
-      <button class="btn sci" onclick="toggleDeg()" id="degBtn">DEG</button>
-    </div>
-  </div>
-</div>
-<div id="loan" class="calc hidden">
-<div class="display" style="font-size:20px;min-height:60px">🏠 房贷计算</div>
-<div class="loan-content">
-<input id="la" type="number" value="100" placeholder="贷款(万)">
-<input id="lr" type="number" value="3.5" step="0.1" placeholder="利率(%)">
-<select id="ly"><option>5</option><option>10</option><option>15</option><option>20</option><option selected>25</option><option>30</option></select>
-<button onclick="calcLoan()">计算</button>
-<div id="lrDiv" class="hidden">
-<div class="result-grid">
-<div class="result-box"><div class="label">月供</div><div class="value" id="lm"></div></div>
-<div class="result-box"><div class="label">利息</div><div class="value orange" id="li"></div></div>
-<div class="result-box"><div class="label">总额</div><div class="value green" id="lt"></div></div>
-</div>
-</div>
-</div>
-</div>
-<div id="unit" class="calc hidden">
-<div class="display" style="font-size:20px;min-height:60px">🔄 单位换算</div>
-<div class="unit-content">
-<select id="ut" onchange="updU()"><option value="c">💱 货币</option><option value="l">📏 长度</option><option value="w">⚖️ 重量</option><option value="t">🌡️ 温度</option></select>
-<div class="unit-row"><input id="uv" type="number" value="1"><select id="uf"></select><select id="ut2"></select></div>
-<button onclick="convU()">换算</button>
-<div id="ur" style="margin-top:15px;padding:20px;background:#007AFF;border-radius:10px;text-align:center;font-size:24px"></div>
-</div>
-</div>
-<div id="health" class="calc hidden">
-<div class="display" style="font-size:20px;min-height:60px">❤️ 健康计算</div>
-<div class="health-content">
-<div class="unit-row"><input id="hh" type="number" value="170" placeholder="身高(cm)"><input id="hw" type="number" value="65" placeholder="体重(kg)"></div>
-<div class="unit-row"><input id="ha" type="number" value="30" placeholder="年龄"><select id="hg"><option>男</option><option>女</option></select></div>
-<select id="hac"><option value="1.2">久坐</option><option value="1.375">轻度</option><option value="1.55" selected>中度</option><option value="1.725">重度</option></select>
-<button onclick="calcH()">计算</button>
-<div id="hrDiv" class="hidden">
-<div class="health-result"><div class="bmi-value" id="bmi"></div><div class="bmi-text" id="cat"></div></div>
-<div class="health-stats"><div class="health-stat"><div class="label">基础代谢</div><div id="bmr"></div></div><div class="health-stat"><div class="label">每日消耗</div><div id="tdee"></div></div></div>
-</div>
-</div>
-</div>
-<script>
-const themes={dark:{bg:'#000',orange:'#ff9f0a',func:'#a5a5a5',sci:'#505050',sciAccent:'#ff9f0a',expr:'#888'},blue:{bg:'#001f3f',orange:'#0074d9',func:'#004080',sci:'#004080',sciAccent:'#7fdbff',expr:'#7fdbff'},purple:{bg:'#1a0a2e',orange:'#9b59b6',func:'#3d2066',sci:'#3d2066',sciAccent:'#d4a5ff',expr:'#9b59b6'},green:{bg:'#0a1a0a',orange:'#2ecc40',func:'#1e4d2b',sci:'#1e4d2b',sciAccent:'#7dff7d',expr:'#2ecc40'},red:{bg:'#1a0a0a',orange:'#e74c3c',func:'#4a2020',sci:'#4a2020',sciAccent:'#ff6b6b',expr:'#e74c3c'},gold:{bg:'#1a150a',orange:'#f39c12',func:'#4a4025',sci:'#4a4025',sciAccent:'#ffd700',expr:'#f39c12'}};
-let currentTheme='dark',calcExpr='',pendingNum=null,pendingOp=null,is2nd=false,isDeg=true,hasResult=false;
-function setTheme(theme,btn){currentTheme=theme;document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const t=themes[theme];document.querySelectorAll('.btn.orange').forEach(b=>b.style.background=t.orange);document.querySelectorAll('.btn.func').forEach(b=>b.style.background=t.func);document.querySelectorAll('.btn.sci').forEach(b=>b.style.color=t.sciAccent);document.getElementById('calcDisplay').style.background=t.bg;document.getElementById('calcExpr').style.color=t.expr}
-function updateDisplay(){document.getElementById('calcExpr').textContent=calcExpr;document.getElementById('calcResult').textContent=pendingNum!==null?String(pendingNum):'0'}
-function appendNum(n){if(hasResult){pendingNum=null;hasResult=false}if(pendingNum===null){pendingNum=n==='.'?'0.':n}else{if(n==='.'&&pendingNum.includes('.'))return;if(pendingNum.length<12)pendingNum+=n}updateDisplay()}
-function appendOp(op){if(pendingNum===null)return;if(pendingOp!==null&&!hasResult)calculate(false);calcExpr=(calcExpr||String(pendingNum))+' '+op;pendingOp=op;hasResult=false;updateDisplay()}
-function calculate(showResult=true){if(pendingNum===null||pendingOp===null)return;const a=parseFloat(pendingNum);let result;if(pendingOp==='EXP'){result=a*Math.pow(10,parseFloat(calcExpr.split('× 10^')[1]||'0'))}else{const b=parseFloat(pendingNum);switch(pendingOp){case '+':result=a+b;break;case '-':result=a-b;break;case '×':result=a*b;break;case '÷':result=b!==0?a/b:0;break;case '^':result=Math.pow(a,b);break;default:result=b}}calcExpr='';pendingNum=formatNum(result);pendingOp=null;hasResult=true;if(showResult)updateDisplay();else pendingNum=result}
-function formatNum(n){if(isNaN(n))return'Error';if(!isFinite(n))return n>0?'∞':'-∞';if(Math.abs(n)>1e12)return n.toExponential(4);if(Number.isInteger(n))return n.toString();return parseFloat(n.toPrecision(10)).toString()}
-function clearAll(){calcExpr='';pendingNum=null;pendingOp=null;hasResult=false;updateDisplay()}
-function negate(){if(pendingNum===null)return;pendingNum=formatNum(parseFloat(pendingNum)*-1);updateDisplay()}
-function toggleDeg(){isDeg=!isDeg;document.getElementById('degBtn').textContent=isDeg?'DEG':'RAD'}
-function toRad(d){return isDeg?d*Math.PI/180:d}
-function toDeg(r){return isDeg?r*180/Math.PI:r}
-function sciFunc(func){let current=pendingNum!==null?parseFloat(pendingNum):0;let result;const prev2nd=is2nd;switch(func){case '2nd':is2nd=!is2nd;return;case 'sin':result=prev2nd?toDeg(Math.asin(current)):Math.sin(toRad(current));break;case 'cos':result=prev2nd?toDeg(Math.acos(current)):Math.cos(toRad(current));break;case 'tan':result=prev2nd?toDeg(Math.atan(current)):Math.tan(toRad(current));break;case 'x2':result=current*current;calcExpr=current+'²';break;case 'sqrt':result=prev2nd?Math.pow(current,1/4):Math.sqrt(current);break;case 'pow':appendOp('^');return;case 'pi':result=Math.PI;break;case 'e':result=Math.E;break;case 'fact':let f=1;for(let i=2;i<=Math.floor(current)&&i<=170;i++)f*=i;result=f;calcExpr=current+'!';break;case '(':calcExpr+='(';return;case ')':calcExpr+=')';return;case 'ln':result=prev2nd?Math.exp(current):Math.log(current);break;case 'log':result=prev2nd?Math.pow(10,current):Math.log10(current);break;case 'exp':calcExpr=current+' × 10^';pendingOp='EXP';return;case '%':result=current/100;break}if(func!=='pow'){calcExpr=(prev2nd?func+'⁻¹':func)+'('+current+')';pendingNum=formatNum(result);hasResult=true;is2nd=false;updateDisplay()}}
-function showTab(id){['calc','loan','unit','health'].forEach(t=>{document.getElementById(t).classList.toggle('hidden',t!==id)});document.querySelectorAll('.tab button').forEach((b,i)=>{b.classList.toggle('active',['calc','loan','unit','health'][i]===id)})}
-function calcLoan(){var A=parseFloat(document.getElementById('la').value)*10000;var R=parseFloat(document.getElementById('lr').value)/100/12;var Y=parseInt(document.getElementById('ly').value);var N=Y*12;var m=A*R*Math.pow(1+R,N)/(Math.pow(1+R,N)-1);document.getElementById('lm').innerText=m.toFixed(2);document.getElementById('li').innerText=Math.round(m*N-A).toLocaleString();document.getElementById('lt').innerText=Math.round(m*N).toLocaleString();document.getElementById('lrDiv').classList.remove('hidden')}
-var u={c:['人民币','美元','欧元','日元','港币','英镑','韩元'],l:['米','厘米','毫米','英尺','英寸'],w:['公斤','克','斤','磅','盎司'],t:['摄氏度','华氏度','开尔文']};var rate={CNY:1,USD:7.2,EUR:0.95,JPY:150,HKD:0.9,GBP:0.85,KRW:190};
-function updU(){var t=document.getElementById('ut').value;var s=u[t];var f=document.getElementById('uf');var t2=document.getElementById('ut2');f.innerHTML='';t2.innerHTML='';s.forEach(function(x,i){f.innerHTML+='<option value="'+i+'">'+x+'</option>'});s.forEach(function(x,i){t2.innerHTML+='<option value="'+i+'">'+x+'</option>'});if(t=='c')t2.selectedIndex=1}updU();
-function convU(){var t=document.getElementById('ut').value;var v=parseFloat(document.getElementById('uv').value);var f=parseInt(document.getElementById('uf').value);var tt=parseInt(document.getElementById('ut2').value);var r;if(t=='c'){var c=['CNY','USD','EUR','JPY','HKD','GBP','KRW'];r=(v/rate[c[f]])*rate[c[tt]];document.getElementById('ur').innerText=r.toFixed(4)}else if(t=='l'){var l=[1,0.01,0.001,0.3048,0.0254];r=v*l[f]/l[tt];document.getElementById('ur').innerText=r.toFixed(6)}else if(t=='w'){var w=[1,0.001,0.5,0.453592,0.0283495];r=v*w[f]/w[tt];document.getElementById('ur').innerText=r.toFixed(6)}else{var c=f==0?v:(f==1?(v-32)*5/9:v-273.15);r=tt==0?c:(tt==1?c*9/5+32:c+273.15);document.getElementById('ur').innerText=r.toFixed(2)+'°'}}
-function calcH(){var h=parseFloat(document.getElementById('hh').value);var w=parseFloat(document.getElementById('hw').value);var ag=parseFloat(document.getElementById('ha').value);var g=document.getElementById('hg').value;var ac=parseFloat(document.getElementById('hac').value);var bmi=w/Math.pow(h/100,2);var cat=bmi<18.5?'偏瘦':bmi<24?'正常':bmi<28?'偏胖':'肥胖';var color=bmi<18.5?'#007AFF':bmi<24?'#34c759':bmi<28?'#ff9500':'#ff3b30';var bmr=g=='男'?10*w+6.25*h-5*ag+5:10*w+6.25*h-5*ag-161;var td=bmr*ac;document.getElementById('bmi').innerText=bmi.toFixed(1);document.getElementById('bmi').style.color=color;document.getElementById('cat').innerText=cat;document.getElementById('cat').style.color=color;document.getElementById('bmr').innerText=Math.round(bmr);document.getElementById('tdee').innerText=Math.round(td);document.getElementById('hrDiv').classList.remove('hidden')}
-</script>
+
+    <script>
+        const themes = {
+            '深空黑': { bg: '#000', btn_bg: '#333', orange: '#ff9f0a', func: '#a5a5a5', sci: '#505050', text: '#fff' },
+            '海洋蓝': { bg: '#001f3f', btn_bg: '#003366', orange: '#0074d9', func: '#004080', sci: '#004080', text: '#fff' },
+            '极光紫': { bg: '#1a0a2e', btn_bg: '#2d1b4e', orange: '#9b59b6', func: '#3d2066', sci: '#3d2066', text: '#fff' },
+            '荧光绿': { bg: '#0a1a0a', btn_bg: '#1a3a1a', orange: '#2ecc40', func: '#1e4d2b', sci: '#1e4d2b', text: '#fff' },
+            '烈焰红': { bg: '#1a0a0a', btn_bg: '#3a1a1a', orange: '#e74c3c', func: '#4a2020', sci: '#4a2020', text: '#fff' },
+            '香槟金': { bg: '#1a150a', btn_bg: '#3a3020', orange: '#f39c12', func: '#4a4025', sci: '#4a4025', text: '#fff' },
+        };
+
+        let currentTheme = '深空黑';
+        let display = '0';
+        let expression = '';
+        let prevVal = null;
+        let operator = null;
+        let newNum = true;
+        let isDeg = true;
+        let is2nd = false;
+
+        function getTheme() { return themes[currentTheme]; }
+
+        function fmt(n) {
+            if (isNaN(n)) return 'Error';
+            if (!isFinite(n)) return n > 0 ? '∞' : '-∞';
+            if (Math.abs(n) > 1e12) return n.toExponential(4);
+            if (n === Math.floor(n)) return String(Math.floor(n));
+            return parseFloat(n.toPrecision(10)).toString();
+        }
+
+        function toRad(d) { return isDeg ? d * Math.PI / 180 : d; }
+        function toDeg(r) { return isDeg ? r * 180 / Math.PI : r; }
+
+        function doCalc(a, b, op) {
+            a = parseFloat(a); b = parseFloat(b);
+            if (op === '+') return a + b;
+            if (op === '-') return a - b;
+            if (op === '×') return a * b;
+            if (op === '÷') return b !== 0 ? a / b : 0;
+            if (op === '^') return Math.pow(a, b);
+            return b;
+        }
+
+        function update() {
+            document.getElementById('display').textContent = display;
+            document.getElementById('expression').textContent = expression;
+            document.body.style.background = getTheme().bg;
+        }
+
+        function factorial(n) {
+            if (n < 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            if (n > 170) return Infinity;
+            let r = 1;
+            for (let i = 2; i <= n; i++) r *= i;
+            return r;
+        }
+
+        function handleBtn(key) {
+            const curr = parseFloat(display);
+
+            if (key === '2nd') {
+                is2nd = !is2nd;
+                renderButtons();
+            } else if (key === 'deg') {
+                isDeg = !isDeg;
+                renderButtons();
+            } else if (key === 'sin') {
+                const r = is2nd ? toDeg(Math.asin(curr)) : Math.sin(toRad(curr));
+                expression = `sin⁻¹(${curr})` if is2nd : `sin(${curr})`;
+                display = fmt(r);
+                is2nd = false;
+            } else if (key === 'cos') {
+                const r = is2nd ? toDeg(Math.acos(curr)) : Math.cos(toRad(curr));
+                expression = `cos⁻¹(${curr})` if is2rd : `cos(${curr})`;
+                display = fmt(r);
+                is2nd = false;
+            } else if (key === 'tan') {
+                const r = is2nd ? toDeg(Math.atan(curr)) : Math.tan(toRad(curr));
+                expression = `tan⁻¹(${curr})` if is2nd : `tan(${curr})`;
+                display = fmt(r);
+                is2nd = false;
+            } else if (key === 'x2') {
+                expression = `${curr}²`;
+                display = fmt(curr * curr);
+            } else if (key === 'sqrt') {
+                const r = is2nd ? Math.pow(curr, 0.25) : Math.sqrt(curr);
+                expression = is2nd ? `∜(${curr})` : `√(${curr})`;
+                display = fmt(r);
+            } else if (key === 'pow') {
+                if (operator && !newNum) {
+                    const result = doCalc(prevVal, display, operator);
+                    display = fmt(result);
+                    prevVal = result;
+                } else {
+                    prevVal = curr;
+                }
+                operator = '^';
+                expression = `${prevVal} ^`;
+                newNum = true;
+            } else if (key === 'pi') {
+                expression = 'π';
+                display = fmt(Math.PI);
+            } else if (key === 'e') {
+                expression = 'e';
+                display = fmt(Math.E);
+            } else if (key === 'fact') {
+                expression = `${curr}!`;
+                display = fmt(factorial(Math.floor(curr)));
+            } else if (key === 'ln') {
+                const r = is2nd ? Math.exp(curr) : Math.log(curr);
+                expression = is2nd ? `e^${curr}` : `ln(${curr})`;
+                display = fmt(r);
+                is2nd = false;
+            } else if (key === 'log') {
+                const r = is2nd ? Math.pow(10, curr) : Math.log10(curr);
+                expression = is2nd ? `10^${curr}` : `log(${curr})`;
+                display = fmt(r);
+                is2nd = false;
+            } else if (key === 'exp') {
+                prevVal = curr;
+                operator = 'EXP';
+                expression = `${curr} × 10^`;
+                newNum = true;
+            } else if (key === 'ac') {
+                display = '0';
+                expression = '';
+                prevVal = null;
+                operator = null;
+                newNum = true;
+            } else if (key === 'neg') {
+                display = fmt(curr * -1);
+            } else if (key === '%') {
+                expression = `${curr}%`;
+                display = fmt(curr / 100);
+            } else if (key >= '0' && key <= '9' || key === '.') {
+                if (newNum || display === '0') {
+                    display = key === '.' ? '0.' : key;
+                    newNum = false;
+                } else if (key === '.' && display.includes('.')) {
+                    return;
+                } else if (display.length < 12) {
+                    display += key;
+                }
+            } else if (key === '+' || key === '-' || key === '×' || key === '÷') {
+                if (operator && !newNum) {
+                    const result = doCalc(prevVal, display, operator);
+                    display = fmt(result);
+                    prevVal = result;
+                } else {
+                    prevVal = curr;
+                }
+                operator = key;
+                expression = `${prevVal} ${key}`;
+                newNum = true;
+            } else if (key === '=' || key === 'eq') {
+                if (operator && prevVal !== null) {
+                    let result;
+                    if (operator === 'EXP') {
+                        result = prevVal * Math.pow(10, curr);
+                        expression = `${prevVal} × 10^${curr}`;
+                    } else {
+                        result = doCalc(prevVal, curr, operator);
+                        expression = `${prevVal} ${operator} ${curr} =`;
+                    }
+                    display = fmt(result);
+                    prevVal = null;
+                    operator = null;
+                    newNum = true;
+                }
+            }
+            update();
+        }
+
+        function createBtn(label, key, cls) {
+            const btn = document.createElement('button');
+            btn.className = `btn ${cls}`;
+            btn.textContent = label;
+            btn.onclick = () => handleBtn(key);
+            return btn;
+        }
+
+        function renderButtons() {
+            const t = getTheme();
+            const btns = document.getElementById('buttons');
+            btns.innerHTML = '';
+
+            // 科学函数
+            const sciRow1 = ['2nd', isDeg ? 'DEG' : 'RAD', 'sin', 'cos'].map((label, i) => {
+                const keys = ['2nd', 'deg', 'sin', 'cos'];
+                return createBtn(label, keys[i], 'btn-dark');
+            });
+            const sciRow2 = ['tan', 'x²', '√', 'xʸ'].map((label, i) => {
+                const keys = ['tan', 'x2', 'sqrt', 'pow'];
+                return createBtn(label, keys[i], 'btn-dark');
+            });
+            const sciRow3 = ['π', 'e', 'n!', 'ln'].map((label, i) => {
+                const keys = ['pi', 'e', 'fact', 'ln'];
+                return createBtn(label, keys[i], 'btn-dark');
+            });
+            const sciRow4 = ['log', 'EXP', '%', '÷'].map((label, i) => {
+                const keys = ['log', 'exp', '%', '÷'];
+                return createBtn(label, keys[i], 'btn-dark');
+            });
+
+            // 分割线
+            btns.appendChild(document.createElement('div')).className = 'divider';
+
+            // 基础运算
+            const basicRow1 = [
+                createBtn('AC', 'ac', 'btn-gray'),
+                createBtn('±', 'neg', 'btn-gray'),
+                createBtn('', '', 'btn'),
+                createBtn('×', '×', 'btn-orange')
+            ];
+
+            const basicRow2 = [
+                createBtn('7', '7', 'btn'),
+                createBtn('8', '8', 'btn'),
+                createBtn('9', '9', 'btn'),
+                createBtn('÷', '÷', 'btn-orange')
+            ];
+
+            const basicRow3 = [
+                createBtn('4', '4', 'btn'),
+                createBtn('5', '5', 'btn'),
+                createBtn('6', '6', 'btn'),
+                createBtn('-', '-', 'btn-orange')
+            ];
+
+            const basicRow4 = [
+                createBtn('1', '1', 'btn'),
+                createBtn('2', '2', 'btn'),
+                createBtn('3', '3', 'btn'),
+                createBtn('+', '+', 'btn-orange')
+            ];
+
+            const basicRow5 = [
+                createBtn('0', '0', 'btn btn-wide'),
+                createBtn('.', '.', 'btn'),
+                createBtn('=', 'eq', 'btn-orange')
+            ];
+
+            [sciRow1, sciRow2, sciRow3, sciRow4, basicRow1, basicRow2, basicRow3, basicRow4, basicRow5].forEach(row => {
+                row.forEach(btn => btns.appendChild(btn));
+            });
+        }
+
+        function renderThemes() {
+            const bar = document.getElementById('themeBar');
+            bar.innerHTML = '';
+            Object.keys(themes).forEach(name => {
+                const btn = document.createElement('button');
+                btn.className = `theme-btn ${name === currentTheme ? 'active' : ''}`;
+                btn.textContent = name;
+                btn.style.background = themes[name].orange;
+                btn.style.color = '#fff';
+                btn.onclick = () => {
+                    currentTheme = name;
+                    renderThemes();
+                    renderButtons();
+                    update();
+                };
+                bar.appendChild(btn);
+            });
+        }
+
+        renderThemes();
+        renderButtons();
+        update();
+    </script>
 </body>
 </html>
