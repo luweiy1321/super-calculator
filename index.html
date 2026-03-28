@@ -164,7 +164,9 @@
                         <select id="unitTo" onchange="convertUnit()"></select>
                     </div>
                 </div>
-                <div class="result-grid">
+                <div id="currencyStatus" style="font-size:11px;color:#888;text-align:center;margin:5px 0;">汇率数据加载中...</div>
+                <button class="calc-btn" onclick="fetchCurrencyRates()" style="background:#666;">🔄 更新汇率</button>
+                <div class="result-grid" style="margin-top:10px;">
                     <div class="result-box" style="grid-column: span 3;">
                         <div class="label">结果</div>
                         <div class="value" id="unitResult" style="font-size:24px;">-</div>
@@ -408,12 +410,29 @@
         }
 
         // 单位换算
+        let currencyRates = { CNY: 1, USD: 7.2, EUR: 7.8, JPY: 0.048, HKD: 0.92, GBP: 9.1 };
+        let currencyLastUpdate = '';
+
         const unitData = {
-            currency: { units: ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP'], rates: { CNY: 1, USD: 7.2, EUR: 7.8, JPY: 0.048, HKD: 0.92, GBP: 9.1 }, names: { CNY: '人民币', USD: '美元', EUR: '欧元', JPY: '日元', HKD: '港币', GBP: '英镑' } },
+            currency: { units: ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP'], names: { CNY: '人民币', USD: '美元', EUR: '欧元', JPY: '日元', HKD: '港币', GBP: '英镑' } },
             length: { units: ['m', 'cm', 'mm', 'km', 'ft', 'in'], rates: { m: 1, cm: 0.01, mm: 0.001, km: 1000, ft: 0.3048, in: 0.0254 }, names: { m: '米', cm: '厘米', mm: '毫米', km: '千米', ft: '英尺', in: '英寸' } },
             weight: { units: ['kg', 'g', 'jin', 'lb', 'oz'], rates: { kg: 1, g: 0.001, jin: 0.5, lb: 0.453592, oz: 0.0283495 }, names: { kg: '公斤', g: '克', jin: '斤', lb: '磅', oz: '盎司' } },
             temp: { units: ['C', 'F', 'K'], names: { C: '摄氏度', F: '华氏度', K: '开尔文' } }
         };
+
+        async function fetchCurrencyRates() {
+            try {
+                const response = await fetch('https://api.frankfurter.dev/v1/latest?base=CNY');
+                const data = await response.json();
+                if (data.rates) {
+                    currencyRates = { CNY: 1, ...data.rates };
+                    currencyLastUpdate = new Date().toLocaleTimeString();
+                    document.getElementById('currencyStatus').textContent = `汇率更新: ${currencyLastUpdate}`;
+                }
+            } catch (e) {
+                document.getElementById('currencyStatus').textContent = '汇率获取失败，使用缓存';
+            }
+        }
 
         function updateUnitOptions() {
             const type = document.getElementById('unitType').value;
@@ -435,10 +454,12 @@
             if (type === 'temp') {
                 let c = from === 'C' ? val : from === 'F' ? (val - 32) * 5 / 9 : val - 273.15;
                 result = to === 'C' ? c : to === 'F' ? c * 9 / 5 + 32 : c + 273.15;
+            } else if (type === 'currency') {
+                result = val * currencyRates[from] / currencyRates[to];
             } else {
                 result = val * unitData[type].rates[from] / unitData[type].rates[to];
             }
-            document.getElementById('unitResult').textContent = result.toFixed(6) + ' ' + unitData[type].names[to];
+            document.getElementById('unitResult').textContent = result.toFixed(4) + ' ' + unitData[type].names[to];
         }
 
         // 健康计算
@@ -466,6 +487,7 @@
         renderButtons();
         update();
         updateUnitOptions();
+        fetchCurrencyRates();
     </script>
 </body>
 </html>
