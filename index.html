@@ -12,45 +12,32 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 10px;
         }
-        .calculator {
-            width: 100%;
-            max-width: 340px;
-        }
+        .app { width: 100%; max-width: 340px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        .tab { padding: 8px 12px; border: none; border-radius: 15px; background: #333; color: #fff; font-size: 13px; cursor: pointer; }
+        .tab.active { background: #007AFF; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .calculator { width: 100%; }
         .display {
             text-align: right;
             padding: 20px 15px;
-            min-height: 120px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
         }
-        .expression {
-            font-size: 16px;
-            color: #888;
-            height: 20px;
-            overflow: hidden;
-        }
-        .result {
-            font-size: 48px;
-            font-weight: 300;
-            color: #fff;
-            letter-spacing: -2px;
-            word-break: break-all;
-        }
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            padding: 5px;
-        }
+        .expression { font-size: 16px; color: #888; height: 20px; overflow: hidden; }
+        .result { font-size: 42px; font-weight: 300; color: #fff; letter-spacing: -2px; word-break: break-all; }
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 5px; }
         .btn {
-            height: 52px;
-            border-radius: 26px;
+            height: 48px;
+            border-radius: 24px;
             border: none;
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 400;
             cursor: pointer;
             transition: all 0.1s;
@@ -59,62 +46,194 @@
             justify-content: center;
             background: #333;
             color: #fff;
-            -webkit-tap-highlight-color: transparent;
         }
-        .btn:active {
-            transform: scale(0.95);
-        }
-        .row { display: contents; }
-        .theme-bar {
-            display: flex;
-            gap: 5px;
-            padding: 5px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .theme-btn {
-            padding: 5px 10px;
-            border-radius: 15px;
-            border: none;
-            font-size: 11px;
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.2s;
-        }
+        .btn:active { transform: scale(0.95); }
+        .theme-bar { display: flex; gap: 5px; padding: 5px; flex-wrap: wrap; margin-bottom: 5px; }
+        .theme-btn { padding: 4px 8px; border-radius: 12px; border: none; font-size: 10px; cursor: pointer; opacity: 0.5; }
         .theme-btn.active { opacity: 1; border: 2px solid #fff; }
-        .divider {
-            grid-column: span 4;
-            height: 1px;
-            background: rgba(255,159,10,0.2);
-            margin: 5px 0;
+        .divider { grid-column: span 4; height: 1px; background: rgba(255,159,10,0.2); margin: 3px 0; }
+        .section-title { font-size: 14px; color: #888; padding: 10px 5px 5px; }
+        .card { background: #1a1a1a; border-radius: 10px; padding: 15px; margin-bottom: 10px; }
+        .card-title { font-size: 16px; color: #fff; margin-bottom: 15px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-group { flex: 1; }
+        .input-group label { font-size: 12px; color: #888; display: block; margin-bottom: 5px; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 10px; border: none; border-radius: 8px; background: #333; color: #fff; font-size: 16px;
         }
-        @media (max-width: 350px) {
-            .btn { height: 48px; font-size: 20px; }
-            .result { font-size: 42px; }
-        }
+        .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .result-box { background: #333; padding: 12px; border-radius: 8px; text-align: center; }
+        .result-box .label { font-size: 11px; color: #888; }
+        .result-box .value { font-size: 16px; color: #007AFF; margin-top: 5px; }
+        .result-box .value.orange { color: #ff9500; }
+        .result-box .value.green { color: #34c759; }
+        .calc-btn { width: 100%; padding: 12px; background: #007AFF; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .bmi-display { text-align: center; padding: 20px; }
+        .bmi-value { font-size: 48px; font-weight: bold; color: #34c759; }
+        .bmi-text { font-size: 16px; color: #34c759; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <div class="calculator">
-        <div class="theme-bar" id="themeBar"></div>
-        <div class="display">
-            <div class="expression" id="expression"></div>
-            <div class="result" id="display">0</div>
+    <div class="app">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('calc')">🧮 计算</button>
+            <button class="tab" onclick="showTab('loan')">🏠 房贷</button>
+            <button class="tab" onclick="showTab('unit')">🔄 换算</button>
+            <button class="tab" onclick="showTab('health')">❤️ 健康</button>
         </div>
-        <div class="buttons" id="buttons"></div>
+
+        <!-- 计算器页面 -->
+        <div id="calc" class="page active">
+            <div class="calculator">
+                <div class="theme-bar" id="themeBar"></div>
+                <div class="display">
+                    <div class="expression" id="expression"></div>
+                    <div class="result" id="display">0</div>
+                </div>
+                <div class="buttons" id="buttons"></div>
+            </div>
+        </div>
+
+        <!-- 房贷计算页面 -->
+        <div id="loan" class="page">
+            <div class="card">
+                <div class="card-title">🏠 房贷计算器</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>贷款金额(万)</label>
+                        <input type="number" id="loanAmt" value="100" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>年利率(%)</label>
+                        <input type="number" id="loanRate" value="3.5" step="0.1" min="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>贷款年限</label>
+                    <select id="loanYears">
+                        <option value="5">5年</option>
+                        <option value="10">10年</option>
+                        <option value="15">15年</option>
+                        <option value="20" selected>20年</option>
+                        <option value="25">25年</option>
+                        <option value="30">30年</option>
+                    </select>
+                </div>
+                <button class="calc-btn" onclick="calcLoan()">计算</button>
+                <div class="result-grid" id="loanResult" style="display:none;">
+                    <div class="result-box">
+                        <div class="label">月供</div>
+                        <div class="value" id="loanMonthly">-</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="label">利息</div>
+                        <div class="value orange" id="loanInterest">-</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="label">总额</div>
+                        <div class="value green" id="loanTotal">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 单位换算页面 -->
+        <div id="unit" class="page">
+            <div class="card">
+                <div class="card-title">🔄 单位换算</div>
+                <div class="input-group">
+                    <label>类型</label>
+                    <select id="unitType" onchange="updateUnitOptions()">
+                        <option value="currency">💱 货币</option>
+                        <option value="length">📏 长度</option>
+                        <option value="weight">⚖️ 重量</option>
+                        <option value="temp">🌡️ 温度</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>数值</label>
+                        <input type="number" id="unitVal" value="1" oninput="convertUnit()">
+                    </div>
+                    <div class="input-group">
+                        <label>从</label>
+                        <select id="unitFrom" onchange="convertUnit()"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>到</label>
+                        <select id="unitTo" onchange="convertUnit()"></select>
+                    </div>
+                </div>
+                <div class="result-grid">
+                    <div class="result-box" style="grid-column: span 3;">
+                        <div class="label">结果</div>
+                        <div class="value" id="unitResult" style="font-size:24px;">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康计算页面 -->
+        <div id="health" class="page">
+            <div class="card">
+                <div class="card-title">❤️ 健康计算器</div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>身高(cm)</label>
+                        <input type="number" id="healthH" value="170" min="50" max="250">
+                    </div>
+                    <div class="input-group">
+                        <label>体重(kg)</label>
+                        <input type="number" id="healthW" value="65" min="20" max="300">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>年龄</label>
+                        <input type="number" id="healthAge" value="30" min="1" max="120">
+                    </div>
+                    <div class="input-group">
+                        <label>性别</label>
+                        <select id="healthGender">
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="calc-btn" onclick="calcHealth()">计算</button>
+                <div id="healthResult" style="display:none;">
+                    <div class="bmi-display">
+                        <div class="bmi-value" id="bmiValue">-</div>
+                        <div class="bmi-text" id="bmiText">-</div>
+                    </div>
+                    <div class="result-grid">
+                        <div class="result-box">
+                            <div class="label">基础代谢</div>
+                            <div class="value" id="bmrValue">-</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="label">每日消耗</div>
+                            <div class="value" id="tdeeValue">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // 主题
         const themes = {
-            '深空黑': { bg: '#000', btn_bg: '#333', orange: '#ff9f0a', func: '#a5a5a5', sci: '#505050', text: '#fff' },
-            '海洋蓝': { bg: '#001f3f', btn_bg: '#003366', orange: '#0074d9', func: '#004080', sci: '#004080', text: '#fff' },
-            '极光紫': { bg: '#1a0a2e', btn_bg: '#2d1b4e', orange: '#9b59b6', func: '#3d2066', sci: '#3d2066', text: '#fff' },
-            '荧光绿': { bg: '#0a1a0a', btn_bg: '#1a3a1a', orange: '#2ecc40', func: '#1e4d2b', sci: '#1e4d2b', text: '#fff' },
-            '烈焰红': { bg: '#1a0a0a', btn_bg: '#3a1a1a', orange: '#e74c3c', func: '#4a2020', sci: '#4a2020', text: '#fff' },
-            '香槟金': { bg: '#1a150a', btn_bg: '#3a3020', orange: '#f39c12', func: '#4a4025', sci: '#4a4025', text: '#fff' },
+            '深空黑': { bg: '#000', btn_bg: '#333', orange: '#ff9f0a', func: '#a5a5a5', sci: '#505050', sci_text: '#ff9f0a', text: '#fff' },
+            '海洋蓝': { bg: '#001f3f', btn_bg: '#003366', orange: '#0074d9', func: '#004080', sci: '#004080', sci_text: '#7fdbff', text: '#fff' },
+            '极光紫': { bg: '#1a0a2e', btn_bg: '#2d1b4e', orange: '#9b59b6', func: '#3d2066', sci: '#3d2066', sci_text: '#d4a5ff', text: '#fff' },
+            '荧光绿': { bg: '#0a1a0a', btn_bg: '#1a3a1a', orange: '#2ecc40', func: '#1e4d2b', sci: '#1e4d2b', sci_text: '#7dff7d', text: '#fff' },
+            '烈焰红': { bg: '#1a0a0a', btn_bg: '#3a1a1a', orange: '#e74c3c', func: '#4a2020', sci: '#4a2020', sci_text: '#ff6b6b', text: '#fff' },
+            '香槟金': { bg: '#1a150a', btn_bg: '#3a3020', orange: '#f39c12', func: '#4a4025', sci: '#4a4025', sci_text: '#ffd700', text: '#fff' },
         };
-
         let currentTheme = '深空黑';
+
+        // 计算器状态
         let display = '0';
         let expression = '';
         let prevVal = null;
@@ -146,12 +265,6 @@
             return b;
         }
 
-        function update() {
-            document.getElementById('display').textContent = display;
-            document.getElementById('expression').textContent = expression;
-            document.body.style.background = getTheme().bg;
-        }
-
         function factorial(n) {
             if (n < 0) return NaN;
             if (n === 0 || n === 1) return 1;
@@ -161,117 +274,68 @@
             return r;
         }
 
+        function update() {
+            document.getElementById('display').textContent = display;
+            document.getElementById('expression').textContent = expression;
+            document.body.style.background = getTheme().bg;
+            document.querySelectorAll('.tab').forEach(t => t.style.background = '#333');
+            document.querySelectorAll('.page.active .card, .page.active .input-group input, .page.active .input-group select').forEach(e => e.style.background = '#333');
+        }
+
         function handleBtn(key) {
             const curr = parseFloat(display);
-
-            if (key === '2nd') {
-                is2nd = !is2nd;
-                renderButtons();
-            } else if (key === 'deg') {
-                isDeg = !isDeg;
-                renderButtons();
-            } else if (key === 'sin') {
+            if (key === '2nd') { is2nd = !is2nd; renderButtons(); }
+            else if (key === 'deg') { isDeg = !isDeg; renderButtons(); }
+            else if (key === 'sin') {
                 const r = is2nd ? toDeg(Math.asin(curr)) : Math.sin(toRad(curr));
                 expression = is2nd ? `sin⁻¹(${curr})` : `sin(${curr})`;
-                display = fmt(r);
-                is2nd = false;
+                display = fmt(r); is2nd = false;
             } else if (key === 'cos') {
                 const r = is2nd ? toDeg(Math.acos(curr)) : Math.cos(toRad(curr));
                 expression = is2nd ? `cos⁻¹(${curr})` : `cos(${curr})`;
-                display = fmt(r);
-                is2nd = false;
+                display = fmt(r); is2nd = false;
             } else if (key === 'tan') {
                 const r = is2nd ? toDeg(Math.atan(curr)) : Math.tan(toRad(curr));
                 expression = is2nd ? `tan⁻¹(${curr})` : `tan(${curr})`;
-                display = fmt(r);
-                is2nd = false;
-            } else if (key === 'x2') {
-                expression = `${curr}²`;
-                display = fmt(curr * curr);
-            } else if (key === 'sqrt') {
+                display = fmt(r); is2nd = false;
+            } else if (key === 'x2') { expression = `${curr}²`; display = fmt(curr * curr); }
+            else if (key === 'sqrt') {
                 const r = is2nd ? Math.pow(curr, 0.25) : Math.sqrt(curr);
                 expression = is2nd ? `∜(${curr})` : `√(${curr})`;
                 display = fmt(r);
             } else if (key === 'pow') {
-                if (operator && !newNum) {
-                    const result = doCalc(prevVal, display, operator);
-                    display = fmt(result);
-                    prevVal = result;
-                } else {
-                    prevVal = curr;
-                }
-                operator = '^';
-                expression = `${prevVal} ^`;
-                newNum = true;
-            } else if (key === 'pi') {
-                expression = 'π';
-                display = fmt(Math.PI);
-            } else if (key === 'e') {
-                expression = 'e';
-                display = fmt(Math.E);
-            } else if (key === 'fact') {
-                expression = `${curr}!`;
-                display = fmt(factorial(Math.floor(curr)));
-            } else if (key === 'ln') {
+                if (operator && !newNum) { const result = doCalc(prevVal, display, operator); display = fmt(result); prevVal = result; }
+                else { prevVal = curr; }
+                operator = '^'; expression = `${prevVal} ^`; newNum = true;
+            } else if (key === 'pi') { expression = 'π'; display = fmt(Math.PI); }
+            else if (key === 'e') { expression = 'e'; display = fmt(Math.E); }
+            else if (key === 'fact') { expression = `${curr}!`; display = fmt(factorial(Math.floor(curr))); }
+            else if (key === 'ln') {
                 const r = is2nd ? Math.exp(curr) : Math.log(curr);
                 expression = is2nd ? `e^${curr}` : `ln(${curr})`;
-                display = fmt(r);
-                is2nd = false;
+                display = fmt(r); is2nd = false;
             } else if (key === 'log') {
                 const r = is2nd ? Math.pow(10, curr) : Math.log10(curr);
                 expression = is2nd ? `10^${curr}` : `log(${curr})`;
-                display = fmt(r);
-                is2nd = false;
-            } else if (key === 'exp') {
-                prevVal = curr;
-                operator = 'EXP';
-                expression = `${curr} × 10^`;
-                newNum = true;
-            } else if (key === 'ac') {
-                display = '0';
-                expression = '';
-                prevVal = null;
-                operator = null;
-                newNum = true;
-            } else if (key === 'neg') {
-                display = fmt(curr * -1);
-            } else if (key === '%') {
-                expression = `${curr}%`;
-                display = fmt(curr / 100);
-            } else if (key >= '0' && key <= '9' || key === '.') {
-                if (newNum || display === '0') {
-                    display = key === '.' ? '0.' : key;
-                    newNum = false;
-                } else if (key === '.' && display.includes('.')) {
-                    return;
-                } else if (display.length < 12) {
-                    display += key;
-                }
+                display = fmt(r); is2nd = false;
+            } else if (key === 'exp') { prevVal = curr; operator = 'EXP'; expression = `${curr} × 10^`; newNum = true; }
+            else if (key === 'ac') { display = '0'; expression = ''; prevVal = null; operator = null; newNum = true; }
+            else if (key === 'neg') { display = fmt(curr * -1); }
+            else if (key === '%') { expression = `${curr}%`; display = fmt(curr / 100); }
+            else if (key >= '0' && key <= '9' || key === '.') {
+                if (newNum || display === '0') { display = key === '.' ? '0.' : key; newNum = false; }
+                else if (key === '.' && display.includes('.')) { return; }
+                else if (display.length < 12) { display += key; }
             } else if (key === '+' || key === '-' || key === '×' || key === '÷') {
-                if (operator && !newNum) {
-                    const result = doCalc(prevVal, display, operator);
-                    display = fmt(result);
-                    prevVal = result;
-                } else {
-                    prevVal = curr;
-                }
-                operator = key;
-                expression = `${prevVal} ${key}`;
-                newNum = true;
+                if (operator && !newNum) { const result = doCalc(prevVal, display, operator); display = fmt(result); prevVal = result; }
+                else { prevVal = curr; }
+                operator = key; expression = `${prevVal} ${key}`; newNum = true;
             } else if (key === '=' || key === 'eq') {
                 if (operator && prevVal !== null) {
                     let result;
-                    if (operator === 'EXP') {
-                        result = prevVal * Math.pow(10, curr);
-                        expression = `${prevVal} × 10^${curr}`;
-                    } else {
-                        result = doCalc(prevVal, curr, operator);
-                        expression = `${prevVal} ${operator} ${curr} =`;
-                    }
-                    display = fmt(result);
-                    prevVal = result;
-                    operator = null;
-                    newNum = true;
+                    if (operator === 'EXP') { result = prevVal * Math.pow(10, curr); expression = `${prevVal} × 10^${curr}`; }
+                    else { result = doCalc(prevVal, curr, operator); expression = `${prevVal} ${operator} ${curr} =`; }
+                    display = fmt(result); prevVal = result; operator = null; newNum = true;
                 }
             }
             update();
@@ -283,92 +347,30 @@
             btn.textContent = label;
             btn.onclick = () => handleBtn(key);
             const t = getTheme();
-            if (type === 'num') {
-                btn.style.background = t.btn_bg;
-                btn.style.color = t.text;
-            } else if (type === 'op') {
-                btn.style.background = t.orange;
-                btn.style.color = '#fff';
-            } else if (type === 'func') {
-                btn.style.background = t.func;
-                btn.style.color = type === 'func' && (t.func === '#a5a5a5' || t.func === '#004080' || t.func === '#3d2066' || t.func === '#1e4d2b' || t.func === '#4a2020' || t.func === '#4a4025') ? '#000' : '#fff';
-            } else if (type === 'sci') {
-                btn.style.background = t.sci;
-                btn.style.color = t.sci_text;
-            } else if (type === 'wide') {
-                btn.style.background = t.btn_bg;
-                btn.style.color = t.text;
-                btn.style.gridColumn = 'span 2';
-            }
+            if (type === 'num') { btn.style.background = t.btn_bg; btn.style.color = t.text; }
+            else if (type === 'op') { btn.style.background = t.orange; btn.style.color = '#fff'; }
+            else if (type === 'func') { btn.style.background = t.func; btn.style.color = '#000'; }
+            else if (type === 'sci') { btn.style.background = t.sci; btn.style.color = t.sci_text; }
+            else if (type === 'wide') { btn.style.background = t.btn_bg; btn.style.color = t.text; btn.style.gridColumn = 'span 2'; }
             return btn;
         }
 
         function renderButtons() {
-            const t = getTheme();
             const btns = document.getElementById('buttons');
             btns.innerHTML = '';
-
-            // 科学函数
-            const sciRow1 = ['2nd', isDeg ? 'DEG' : 'RAD', 'sin', 'cos'].map((label, i) => {
-                const keys = ['2nd', 'deg', 'sin', 'cos'];
-                return createBtn(label, keys[i], 'sci');
-            });
-            const sciRow2 = ['tan', 'x²', '√', 'xʸ'].map((label, i) => {
-                const keys = ['tan', 'x2', 'sqrt', 'pow'];
-                return createBtn(label, keys[i], 'sci');
-            });
-            const sciRow3 = ['π', 'e', 'n!', 'ln'].map((label, i) => {
-                const keys = ['pi', 'e', 'fact', 'ln'];
-                return createBtn(label, keys[i], 'sci');
-            });
-            const sciRow4 = ['log', 'EXP', '%', '÷'].map((label, i) => {
-                const keys = ['log', 'exp', '%', '÷'];
-                return createBtn(label, keys[i], 'sci');
-            });
-
-            // 分割线
+            const sciRow1 = ['2nd', isDeg ? 'DEG' : 'RAD', 'sin', 'cos'].map((label, i) => createBtn(label, ['2nd','deg','sin','cos'][i], 'sci'));
+            const sciRow2 = ['tan', 'x²', '√', 'xʸ'].map((label, i) => createBtn(label, ['tan','x2','sqrt','pow'][i], 'sci'));
+            const sciRow3 = ['π', 'e', 'n!', 'ln'].map((label, i) => createBtn(label, ['pi','e','fact','ln'][i], 'sci'));
+            const sciRow4 = ['log', 'EXP', '%', '÷'].map((label, i) => createBtn(label, ['log','exp','%','÷'][i], 'sci'));
             const divider = document.createElement('div');
             divider.className = 'divider';
             btns.appendChild(divider);
-
-            // 基础运算
-            const basicRow1 = [
-                createBtn('AC', 'ac', 'func'),
-                createBtn('±', 'neg', 'func'),
-                createBtn('', '', 'num'),
-                createBtn('×', '×', 'op')
-            ];
-
-            const basicRow2 = [
-                createBtn('7', '7', 'num'),
-                createBtn('8', '8', 'num'),
-                createBtn('9', '9', 'num'),
-                createBtn('÷', '÷', 'op')
-            ];
-
-            const basicRow3 = [
-                createBtn('4', '4', 'num'),
-                createBtn('5', '5', 'num'),
-                createBtn('6', '6', 'num'),
-                createBtn('-', '-', 'op')
-            ];
-
-            const basicRow4 = [
-                createBtn('1', '1', 'num'),
-                createBtn('2', '2', 'num'),
-                createBtn('3', '3', 'num'),
-                createBtn('+', '+', 'op')
-            ];
-
-            const basicRow5 = [
-                createBtn('0', '0', 'wide'),
-                createBtn('.', '.', 'num'),
-                createBtn('=', 'eq', 'op')
-            ];
-
-            [sciRow1, sciRow2, sciRow3, sciRow4, basicRow1, basicRow2, basicRow3, basicRow4, basicRow5].forEach(row => {
-                row.forEach(btn => btns.appendChild(btn));
-            });
+            const basicRow1 = [createBtn('AC', 'ac', 'func'), createBtn('±', 'neg', 'func'), createBtn('', '', 'num'), createBtn('×', '×', 'op')];
+            const basicRow2 = [createBtn('7', '7', 'num'), createBtn('8', '8', 'num'), createBtn('9', '9', 'num'), createBtn('÷', '÷', 'op')];
+            const basicRow3 = [createBtn('4', '4', 'num'), createBtn('5', '5', 'num'), createBtn('6', '6', 'num'), createBtn('-', '-', 'op')];
+            const basicRow4 = [createBtn('1', '1', 'num'), createBtn('2', '2', 'num'), createBtn('3', '3', 'num'), createBtn('+', '+', 'op')];
+            const basicRow5 = [createBtn('0', '0', 'wide'), createBtn('.', '.', 'num'), createBtn('=', 'eq', 'op')];
+            [sciRow1, sciRow2, sciRow3, sciRow4, basicRow1, basicRow2, basicRow3, basicRow4, basicRow5].forEach(row => row.forEach(btn => btns.appendChild(btn)));
         }
 
         function renderThemes() {
@@ -380,19 +382,90 @@
                 btn.textContent = name;
                 btn.style.background = themes[name].orange;
                 btn.style.color = '#fff';
-                btn.onclick = () => {
-                    currentTheme = name;
-                    renderThemes();
-                    renderButtons();
-                    update();
-                };
+                btn.onclick = () => { currentTheme = name; renderThemes(); renderButtons(); update(); };
                 bar.appendChild(btn);
             });
         }
 
+        function showTab(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 房贷计算
+        function calcLoan() {
+            const amt = parseFloat(document.getElementById('loanAmt').value) * 10000;
+            const rate = parseFloat(document.getElementById('loanRate').value) / 100 / 12;
+            const years = parseInt(document.getElementById('loanYears').value);
+            const n = years * 12;
+            const mp = amt * rate * Math.pow(1 + rate, n) / (Math.pow(1 + rate, n) - 1);
+            document.getElementById('loanMonthly').textContent = mp.toFixed(2);
+            document.getElementById('loanInterest').textContent = (mp * n - amt).toFixed(0);
+            document.getElementById('loanTotal').textContent = (mp * n).toFixed(0);
+            document.getElementById('loanResult').style.display = 'grid';
+        }
+
+        // 单位换算
+        const unitData = {
+            currency: { units: ['CNY', 'USD', 'EUR', 'JPY', 'HKD', 'GBP'], rates: { CNY: 1, USD: 7.2, EUR: 7.8, JPY: 0.048, HKD: 0.92, GBP: 9.1 }, names: { CNY: '人民币', USD: '美元', EUR: '欧元', JPY: '日元', HKD: '港币', GBP: '英镑' } },
+            length: { units: ['m', 'cm', 'mm', 'km', 'ft', 'in'], rates: { m: 1, cm: 0.01, mm: 0.001, km: 1000, ft: 0.3048, in: 0.0254 }, names: { m: '米', cm: '厘米', mm: '毫米', km: '千米', ft: '英尺', in: '英寸' } },
+            weight: { units: ['kg', 'g', 'jin', 'lb', 'oz'], rates: { kg: 1, g: 0.001, jin: 0.5, lb: 0.453592, oz: 0.0283495 }, names: { kg: '公斤', g: '克', jin: '斤', lb: '磅', oz: '盎司' } },
+            temp: { units: ['C', 'F', 'K'], names: { C: '摄氏度', F: '华氏度', K: '开尔文' } }
+        };
+
+        function updateUnitOptions() {
+            const type = document.getElementById('unitType').value;
+            const from = document.getElementById('unitFrom');
+            const to = document.getElementById('unitTo');
+            const units = unitData[type].units;
+            from.innerHTML = units.map(u => `<option value="${u}">${unitData[type].names[u]}</option>`).join('');
+            to.innerHTML = units.map(u => `<option value="${u}">${unitData[type].names[u]}</option>`).join('');
+            if (units.length > 1) to.selectedIndex = 1;
+            convertUnit();
+        }
+
+        function convertUnit() {
+            const type = document.getElementById('unitType').value;
+            const val = parseFloat(document.getElementById('unitVal').value) || 0;
+            const from = document.getElementById('unitFrom').value;
+            const to = document.getElementById('unitTo').value;
+            let result;
+            if (type === 'temp') {
+                let c = from === 'C' ? val : from === 'F' ? (val - 32) * 5 / 9 : val - 273.15;
+                result = to === 'C' ? c : to === 'F' ? c * 9 / 5 + 32 : c + 273.15;
+            } else {
+                result = val * unitData[type].rates[from] / unitData[type].rates[to];
+            }
+            document.getElementById('unitResult').textContent = result.toFixed(6) + ' ' + unitData[type].names[to];
+        }
+
+        // 健康计算
+        function calcHealth() {
+            const h = parseFloat(document.getElementById('healthH').value);
+            const w = parseFloat(document.getElementById('healthW').value);
+            const age = parseInt(document.getElementById('healthAge').value);
+            const gender = document.getElementById('healthGender').value;
+            const bmi = w / Math.pow(h / 100, 2);
+            const bmr = 10 * w + 6.25 * h - 5 * age + (gender === 'male' ? 5 : -161);
+            const tdee = bmr * 1.55;
+            const cat = bmi < 18.5 ? '偏瘦' : bmi < 24 ? '正常' : bmi < 28 ? '偏胖' : '肥胖';
+            const color = bmi < 18.5 || bmi >= 28 ? '#ff3b30' : bmi < 24 ? '#34c759' : '#ff9500';
+            document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+            document.getElementById('bmiValue').style.color = color;
+            document.getElementById('bmiText').textContent = cat;
+            document.getElementById('bmiText').style.color = color;
+            document.getElementById('bmrValue').textContent = Math.round(bmr);
+            document.getElementById('tdeeValue').textContent = Math.round(tdee);
+            document.getElementById('healthResult').style.display = 'block';
+        }
+
+        // 初始化
         renderThemes();
         renderButtons();
         update();
+        updateUnitOptions();
     </script>
 </body>
 </html>
