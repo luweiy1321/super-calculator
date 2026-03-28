@@ -64,10 +64,6 @@
         .btn:active {
             transform: scale(0.95);
         }
-        .btn-orange { background: #ff9f0a; color: #fff; }
-        .btn-gray { background: #a5a5a5; color: #000; }
-        .btn-dark { background: #505050; color: #fff; }
-        .btn-wide { grid-column: span 2; }
         .row { display: contents; }
         .theme-bar {
             display: flex;
@@ -281,11 +277,29 @@
             update();
         }
 
-        function createBtn(label, key, cls) {
+        function createBtn(label, key, type) {
             const btn = document.createElement('button');
-            btn.className = `btn ${cls}`;
+            btn.className = 'btn';
             btn.textContent = label;
             btn.onclick = () => handleBtn(key);
+            const t = getTheme();
+            if (type === 'num') {
+                btn.style.background = t.btn_bg;
+                btn.style.color = t.text;
+            } else if (type === 'op') {
+                btn.style.background = t.orange;
+                btn.style.color = '#fff';
+            } else if (type === 'func') {
+                btn.style.background = t.func;
+                btn.style.color = type === 'func' && (t.func === '#a5a5a5' || t.func === '#004080' || t.func === '#3d2066' || t.func === '#1e4d2b' || t.func === '#4a2020' || t.func === '#4a4025') ? '#000' : '#fff';
+            } else if (type === 'sci') {
+                btn.style.background = t.sci;
+                btn.style.color = t.sci_text;
+            } else if (type === 'wide') {
+                btn.style.background = t.btn_bg;
+                btn.style.color = t.text;
+                btn.style.gridColumn = 'span 2';
+            }
             return btn;
         }
 
@@ -297,19 +311,19 @@
             // 科学函数
             const sciRow1 = ['2nd', isDeg ? 'DEG' : 'RAD', 'sin', 'cos'].map((label, i) => {
                 const keys = ['2nd', 'deg', 'sin', 'cos'];
-                return createBtn(label, keys[i], 'btn-dark');
+                return createBtn(label, keys[i], 'sci');
             });
             const sciRow2 = ['tan', 'x²', '√', 'xʸ'].map((label, i) => {
                 const keys = ['tan', 'x2', 'sqrt', 'pow'];
-                return createBtn(label, keys[i], 'btn-dark');
+                return createBtn(label, keys[i], 'sci');
             });
             const sciRow3 = ['π', 'e', 'n!', 'ln'].map((label, i) => {
                 const keys = ['pi', 'e', 'fact', 'ln'];
-                return createBtn(label, keys[i], 'btn-dark');
+                return createBtn(label, keys[i], 'sci');
             });
             const sciRow4 = ['log', 'EXP', '%', '÷'].map((label, i) => {
                 const keys = ['log', 'exp', '%', '÷'];
-                return createBtn(label, keys[i], 'btn-dark');
+                return createBtn(label, keys[i], 'sci');
             });
 
             // 分割线
@@ -319,37 +333,37 @@
 
             // 基础运算
             const basicRow1 = [
-                createBtn('AC', 'ac', 'btn-gray'),
-                createBtn('±', 'neg', 'btn-gray'),
-                createBtn('', '', 'btn'),
-                createBtn('×', '×', 'btn-orange')
+                createBtn('AC', 'ac', 'func'),
+                createBtn('±', 'neg', 'func'),
+                createBtn('', '', 'num'),
+                createBtn('×', '×', 'op')
             ];
 
             const basicRow2 = [
-                createBtn('7', '7', 'btn'),
-                createBtn('8', '8', 'btn'),
-                createBtn('9', '9', 'btn'),
-                createBtn('÷', '÷', 'btn-orange')
+                createBtn('7', '7', 'num'),
+                createBtn('8', '8', 'num'),
+                createBtn('9', '9', 'num'),
+                createBtn('÷', '÷', 'op')
             ];
 
             const basicRow3 = [
-                createBtn('4', '4', 'btn'),
-                createBtn('5', '5', 'btn'),
-                createBtn('6', '6', 'btn'),
-                createBtn('-', '-', 'btn-orange')
+                createBtn('4', '4', 'num'),
+                createBtn('5', '5', 'num'),
+                createBtn('6', '6', 'num'),
+                createBtn('-', '-', 'op')
             ];
 
             const basicRow4 = [
-                createBtn('1', '1', 'btn'),
-                createBtn('2', '2', 'btn'),
-                createBtn('3', '3', 'btn'),
-                createBtn('+', '+', 'btn-orange')
+                createBtn('1', '1', 'num'),
+                createBtn('2', '2', 'num'),
+                createBtn('3', '3', 'num'),
+                createBtn('+', '+', 'op')
             ];
 
             const basicRow5 = [
-                createBtn('0', '0', 'btn btn-wide'),
-                createBtn('.', '.', 'btn'),
-                createBtn('=', 'eq', 'btn-orange')
+                createBtn('0', '0', 'wide'),
+                createBtn('.', '.', 'num'),
+                createBtn('=', 'eq', 'op')
             ];
 
             [sciRow1, sciRow2, sciRow3, sciRow4, basicRow1, basicRow2, basicRow3, basicRow4, basicRow5].forEach(row => {
