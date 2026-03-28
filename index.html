@@ -455,7 +455,7 @@
                 let c = from === 'C' ? val : from === 'F' ? (val - 32) * 5 / 9 : val - 273.15;
                 result = to === 'C' ? c : to === 'F' ? c * 9 / 5 + 32 : c + 273.15;
             } else if (type === 'currency') {
-                result = val * currencyRates[from] / currencyRates[to];
+                result = val / currencyRates[from] * currencyRates[to];
             } else {
                 result = val * unitData[type].rates[from] / unitData[type].rates[to];
             }
