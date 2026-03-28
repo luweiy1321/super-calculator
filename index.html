@@ -459,7 +459,9 @@
             } else {
                 result = val * unitData[type].rates[from] / unitData[type].rates[to];
             }
-            document.getElementById('unitResult').textContent = result.toFixed(4) + ' ' + unitData[type].names[to];
+            const fromName = unitData[type].names[from] || from;
+            const toName = unitData[type].names[to] || to;
+            document.getElementById('unitResult').textContent = `${val} ${fromName} = ${result.toFixed(4)} ${toName}`;
         }
 
         // 健康计算
